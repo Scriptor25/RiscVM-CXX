@@ -1,0 +1,104 @@
+#include <istream>
+#include <RiscVM/Assembler.hpp>
+#include <RiscVM/Instruction.hpp>
+#include <RiscVM/Operand.hpp>
+#include <RiscVM/Section.hpp>
+#include <RiscVM/Symbol.hpp>
+
+#include "RiscVM/VM.hpp"
+
+std::ostream& RiscVM::operator<<(std::ostream& os, const TokenType& type)
+{
+    switch (type)
+    {
+    case TokenType_EOF: return os << "EOF";
+    case TokenType_NewLine: return os << "New Line";
+    case TokenType_Label: return os << "Label";
+    case TokenType_CompileDirective: return os << "Compile Directive";
+    case TokenType_Symbol: return os << "Symbol";
+    case TokenType_Immediate: return os << "Immediate";
+    case TokenType_Char: return os << "Char";
+    case TokenType_Dot: return os << "Dot";
+    case TokenType_Comma: return os << "Comma";
+    default: return os << "?";
+    }
+}
+
+std::ostream& RiscVM::operator<<(std::ostream& os, const Token& token)
+{
+    return os << token.Type << ": '" << token.Value << "' | " << token.Immediate;
+}
+
+RiscVM::Assembler::Assembler(std::istream& stream)
+    : m_Stream(stream)
+{
+    m_C = stream.get();
+    Next();
+
+    m_ActiveSection = &m_Sections[".text"];
+}
+
+void RiscVM::Assembler::Parse()
+{
+    while (NextAt(TokenType_NewLine))
+    {
+    }
+
+    if (At(TokenType_Label))
+        ParseLabel();
+
+    if (At(TokenType_Symbol))
+    {
+        if (m_Token.Value.front() == '.')
+        {
+            ParseCompileDirective();
+        }
+        else
+        {
+            ParseInstruction();
+        }
+    }
+
+    if (!At(TokenType_EOF))
+        Expect(TokenType_NewLine);
+}
+
+void RiscVM::Assembler::ParseLabel()
+{
+    const auto label = Expect(TokenType_Label).Value;
+    const auto offset = m_ActiveSection->Size;
+    m_SymbolTable[label] = {m_ActiveSection, offset};
+}
+
+int RiscVM::Assembler::Get() const
+{
+    return m_Stream.get();
+}
+
+RiscVM::Token RiscVM::Assembler::Skip()
+{
+    auto t = m_Token;
+    Next();
+    return t;
+}
+
+RiscVM::Token RiscVM::Assembler::Expect(const TokenType type)
+{
+    if (At(type)) return Skip();
+    throw std::runtime_error("unexpected token");
+}
+
+bool RiscVM::Assembler::At(const TokenType type) const
+{
+    return type == m_Token.Type;
+}
+
+bool RiscVM::Assembler::NextAt(const TokenType type)
+{
+    if (At(type))
+    {
+        Next();
+        return true;
+    }
+    return false;
+}

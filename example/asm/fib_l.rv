@@ -1,0 +1,30 @@
+;
+; fibonacci example using loop
+;
+
+.section .text
+_start:
+    li   a0,10      ; n = 10
+    call fib        ; x = fib(n)
+    li   a7,93
+    ecall           ; exit(x)
+
+;
+; Fibonacci
+; Args:
+;  a0: n
+;
+fib:
+    li   t0,0       ; a = 0
+    li   t1,1       ; b = 0
+    li   t2,0       ; i = 0
+loop:
+    bge  t2,a0,end  ; if i >= n goto end
+    addi t2,t2,1    ; i++
+    add  t3,t0,t1   ; x = a + b
+    mv   t0,t1      ; a = b
+    mv   t1,t3      ; b = x
+    j    loop       ; goto loop
+end:
+    mv   a0,t0
+    ret             ; return a
