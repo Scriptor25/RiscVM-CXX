@@ -103,7 +103,7 @@ void RiscVM::Format::B::Dump() const
 
 int32_t RiscVM::Format::U::Immediate() const
 {
-    return static_cast<int32_t>(Extend(Imm_31, 1) << 31 | Imm_30_12 << 12);
+    return static_cast<int32_t>(Imm_31 << 31 | Imm_30_12 << 12);
 }
 
 uint32_t RiscVM::Format::U::UImmediate() const
@@ -153,6 +153,14 @@ void RiscVM::Format::J::Dump() const
         Immediate());
 }
 
+uint32_t RiscVM::ImmBits(const uint32_t data, const uint32_t end, const uint32_t beg)
+{
+    uint32_t mask = 0;
+    for (unsigned i = beg; i <= end; ++i)
+        mask = mask << 1 | 0b1;
+    return data >> beg & mask;
+}
+
 uint32_t RiscVM::Extend(const uint32_t bit, const uint32_t n)
 {
     uint32_t mask = 0;
@@ -178,32 +186,45 @@ uint32_t RiscVM::Rs2(const uint32_t data)
 
 int32_t RiscVM::ImmediateI(const uint32_t data)
 {
-    return Format::I{.Data = data}.Immediate();
+    const auto imm_11 = ImmBits(data, 31, 31);
+    const auto imm_10_0 = ImmBits(data, 30, 20);
+    return static_cast<int32_t>(Extend(imm_11, 21) << 11 | imm_10_0);
 }
 
 int32_t RiscVM::ImmediateS(const uint32_t data)
 {
-    return Format::S{.Data = data}.Immediate();
+    const auto imm_11 = ImmBits(data, 31, 31);
+    const auto imm_10_5 = ImmBits(data, 30, 25);
+    const auto imm_4_0 = ImmBits(data, 11, 7);
+    return static_cast<int32_t>(Extend(imm_11, 21) << 11 | imm_10_5 << 5 | imm_4_0);
 }
 
 int32_t RiscVM::ImmediateB(const uint32_t data)
 {
-    return Format::B{.Data = data}.Immediate();
+    const auto imm_12 = ImmBits(data, 31, 31);
+    const auto imm_11 = ImmBits(data, 7, 7);
+    const auto imm_10_5 = ImmBits(data, 30, 25);
+    const auto imm_4_1 = ImmBits(data, 11, 8);
+    return static_cast<int32_t>(Extend(imm_12, 20) << 12 | imm_11 << 11 | imm_10_5 << 5 | imm_4_1 << 1);
 }
 
 int32_t RiscVM::ImmediateU(const uint32_t data)
 {
-    return Format::U{.Data = data}.Immediate();
+    return static_cast<int32_t>(ImmBits(data, 31, 12) << 12);
 }
 
 int32_t RiscVM::ImmediateJ(const uint32_t data)
 {
-    return Format::J{.Data = data}.Immediate();
+    const auto imm_20 = ImmBits(data, 31, 31);
+    const auto imm_19_12 = ImmBits(data, 19, 12);
+    const auto imm_11 = ImmBits(data, 20, 20);
+    const auto imm_10_1 = ImmBits(data, 30, 21);
+    return static_cast<int32_t>(Extend(imm_20, 12) << 20 | imm_19_12 << 12 | imm_11 << 11 | imm_10_1 << 1);
 }
 
 uint32_t RiscVM::UImmediateI(const uint32_t data)
 {
-    return Format::I{.Data = data}.UImmediate();
+    return ImmBits(data, 31, 20);
 }
 
 static std::unordered_map<std::string, RiscVM::Register> string_to_register

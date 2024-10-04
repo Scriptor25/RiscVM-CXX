@@ -15,12 +15,12 @@ void RiscVM::VM::Load(const char* pgm, const size_t len)
 {
     memcpy(m_Memory, pgm, len);
     m_PC = 0;
-    m_Running = true;
+    m_Ok = true;
 }
 
 bool RiscVM::VM::Cycle()
 {
-    if (m_Running && m_PC >= 0 && m_PC < 4096)
+    if (m_Ok && m_PC >= 0 && m_PC < 4096)
     {
         const auto inst = *reinterpret_cast<uint32_t*>(&m_Memory[m_PC]);
         const auto pc = m_PC;
@@ -31,8 +31,13 @@ bool RiscVM::VM::Cycle()
         return true;
     }
 
-    m_Running = false;
+    m_Ok = false;
     return false;
+}
+
+bool RiscVM::VM::Ok() const
+{
+    return m_Ok;
 }
 
 char* RiscVM::VM::Memory()
@@ -109,19 +114,16 @@ void RiscVM::VM::Exec(const uint32_t data)
 
 void RiscVM::VM::LUI(const uint32_t rd, const int32_t imm)
 {
-    fprintf(stdout, "lui   %s=%d,%d\n", RegisterName(rd), R(rd), imm);
     R(rd) = imm;
 }
 
 void RiscVM::VM::AUIPC(const uint32_t rd, const int32_t imm)
 {
-    fprintf(stdout, "auipc %s=%d,%d\n", RegisterName(rd), R(rd), imm);
     R(rd) = imm + m_PC;
 }
 
 void RiscVM::VM::JAL(const uint32_t rd, const int32_t imm)
 {
-    fprintf(stdout, "jal   %s=%d,%d\n", RegisterName(rd), R(rd), imm);
     R(rd) = m_PC + 4;
     m_PC += imm;
     m_DirtyPC = true;
@@ -129,7 +131,6 @@ void RiscVM::VM::JAL(const uint32_t rd, const int32_t imm)
 
 void RiscVM::VM::JALR(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "jalr  %s=%d,%d(%s=%d)\n", RegisterName(rd), R(rd), imm, RegisterName(rs1), R(rs1));
     const auto a = R(rs1) + imm;
     R(rd) = m_PC + 4;
     m_PC = a;
@@ -138,7 +139,6 @@ void RiscVM::VM::JALR(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 
 void RiscVM::VM::BEQ(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    fprintf(stdout, "beq   %s=%d,%s=%d,%d\n", RegisterName(rs1), R(rs1), RegisterName(rs2), R(rs2), imm);
     if (R(rs1) == R(rs2))
     {
         m_PC += imm;
@@ -148,7 +148,6 @@ void RiscVM::VM::BEQ(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 
 void RiscVM::VM::BNE(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    fprintf(stdout, "bne   %s=%d,%s=%d,%d\n", RegisterName(rs1), R(rs1), RegisterName(rs2), R(rs2), imm);
     if (R(rs1) != R(rs2))
     {
         m_PC += imm;
@@ -158,7 +157,6 @@ void RiscVM::VM::BNE(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 
 void RiscVM::VM::BLT(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    fprintf(stdout, "blt   %s=%d,%s=%d,%d\n", RegisterName(rs1), R(rs1), RegisterName(rs2), R(rs2), imm);
     if (R(rs1) < R(rs2))
     {
         m_PC += imm;
@@ -168,7 +166,6 @@ void RiscVM::VM::BLT(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 
 void RiscVM::VM::BGE(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    fprintf(stdout, "bge   %s=%d,%s=%d,%d\n", RegisterName(rs1), R(rs1), RegisterName(rs2), R(rs2), imm);
     if (R(rs1) >= R(rs2))
     {
         m_PC += imm;
@@ -178,7 +175,6 @@ void RiscVM::VM::BGE(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 
 void RiscVM::VM::BLTU(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    fprintf(stdout, "bltu  %s=%d,%s=%d,%d\n", RegisterName(rs1), R(rs1), RegisterName(rs2), R(rs2), imm);
     if (static_cast<uint32_t>(R(rs1)) < static_cast<uint32_t>(R(rs2)))
     {
         m_PC += imm;
@@ -188,7 +184,6 @@ void RiscVM::VM::BLTU(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 
 void RiscVM::VM::BGEU(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    fprintf(stdout, "bgeu  %s=%d,%s=%d,%d\n", RegisterName(rs1), R(rs1), RegisterName(rs2), R(rs2), imm);
     if (static_cast<uint32_t>(R(rs1)) >= static_cast<uint32_t>(R(rs2)))
     {
         m_PC += imm;
@@ -198,173 +193,136 @@ void RiscVM::VM::BGEU(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 
 void RiscVM::VM::LB(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "lb    %s=%d,%d(%s=%d)\n", RegisterName(rd), R(rd), imm, RegisterName(rs1), R(rs1));
     R(rd) = static_cast<uint8_t>(m_Memory[R(rs1) + imm]);
 }
 
 void RiscVM::VM::LH(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "lh    %s=%d,%d(%s=%d)\n", RegisterName(rd), R(rd), imm, RegisterName(rs1), R(rs1));
     R(rd) = *reinterpret_cast<int16_t*>(&m_Memory[R(rs1) + imm]);
 }
 
 void RiscVM::VM::LW(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "lw    %s=%d,%d(%s=%d)\n", RegisterName(rd), R(rd), imm, RegisterName(rs1), R(rs1));
     R(rd) = *reinterpret_cast<int32_t*>(&m_Memory[R(rs1) + imm]);
 }
 
 void RiscVM::VM::LBU(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "lbu   %s=%d,%d(%s=%d)\n", RegisterName(rd), R(rd), imm, RegisterName(rs1), R(rs1));
     R(rd) = *reinterpret_cast<uint8_t*>(&m_Memory[R(rs1) + imm]);
 }
 
 void RiscVM::VM::LHU(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "lhu   %s=%d,%d(%s=%d)\n", RegisterName(rd), R(rd), imm, RegisterName(rs1), R(rs1));
     R(rd) = *reinterpret_cast<uint16_t*>(&m_Memory[R(rs1) + imm]);
 }
 
 void RiscVM::VM::SB(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    fprintf(stdout, "sb    %s=%d,%d(%s=%d)\n", RegisterName(rs1), R(rs1), imm, RegisterName(rs2), R(rs2));
     m_Memory[R(rs2) + imm] = static_cast<int8_t>(R(rs1));
 }
 
 void RiscVM::VM::SH(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    fprintf(stdout, "sh    %s=%d,%d(%s=%d)\n", RegisterName(rs1), R(rs1), imm, RegisterName(rs2), R(rs2));
     *reinterpret_cast<int16_t*>(&m_Memory[R(rs2) + imm]) = static_cast<int16_t>(R(rs1));
 }
 
 void RiscVM::VM::SW(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    fprintf(stdout, "sw    %s=%d,%d(%s=%d)\n", RegisterName(rs1), R(rs1), imm, RegisterName(rs2), R(rs2));
     *reinterpret_cast<int32_t*>(&m_Memory[R(rs2) + imm]) = R(rs1);
 }
 
 void RiscVM::VM::ADDI(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "addi  %s=%d,%s=%d,%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), imm);
     R(rd) = R(rs1) + imm;
 }
 
 void RiscVM::VM::SLTI(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "slti  %s=%d,%s=%d,%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), imm);
     R(rd) = R(rs1) < imm;
 }
 
 void RiscVM::VM::SLTIU(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "sltiu %s=%d,%s=%d,%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), imm);
     R(rd) = static_cast<uint32_t>(R(rs1)) < static_cast<uint32_t>(imm);
 }
 
 void RiscVM::VM::XORI(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "xori  %s=%d,%s=%d,%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), imm);
     R(rd) = R(rs1) ^ imm;
 }
 
 void RiscVM::VM::ORI(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "ori   %s=%d,%s=%d,%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), imm);
     R(rd) = R(rs1) | imm;
 }
 
 void RiscVM::VM::ANDI(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    fprintf(stdout, "andi  %s=%d,%s=%d,%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), imm);
     R(rd) = R(rs1) & imm;
 }
 
 void RiscVM::VM::SLLI(const uint32_t rd, const uint32_t rs1, const uint32_t imm)
 {
-    fprintf(stdout, "slli  %s=%d,%s=%d,%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), imm);
     R(rd) = R(rs1) << imm;
 }
 
 void RiscVM::VM::SRLI(const uint32_t rd, const uint32_t rs1, const uint32_t imm)
 {
-    fprintf(stdout, "srli  %s=%d,%s=%d,%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), imm);
     R(rd) = R(rs1) >> imm;
 }
 
 void RiscVM::VM::SRAI(const uint32_t rd, const uint32_t rs1, const uint32_t imm)
 {
-    fprintf(stdout, "srai  %s=%d,%s=%d,%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), imm);
     R(rd) = R(rs1) >> imm;
 }
 
 void RiscVM::VM::ADD(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "add   %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = R(rs1) + R(rs2);
 }
 
 void RiscVM::VM::SUB(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "sub   %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = R(rs1) - R(rs2);
 }
 
 void RiscVM::VM::SLL(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "sll   %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = R(rs1) << R(rs2);
 }
 
 void RiscVM::VM::SLT(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "slt   %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = R(rs1) < R(rs2);
 }
 
 void RiscVM::VM::SLTU(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "sltu  %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = static_cast<uint32_t>(R(rs1)) < static_cast<uint32_t>(R(rs2));
 }
 
 void RiscVM::VM::XOR(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "xor   %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = R(rs1) ^ R(rs2);
 }
 
 void RiscVM::VM::SRL(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "srl   %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = R(rs1) >> R(rs2);
 }
 
 void RiscVM::VM::SRA(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "sra   %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = R(rs1) >> R(rs2);
 }
 
 void RiscVM::VM::OR(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "or    %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = R(rs1) | R(rs2);
 }
 
 void RiscVM::VM::AND(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 {
-    fprintf(stdout, "and   %s=%d,%s=%d,%s=%d\n", RegisterName(rd), R(rd), RegisterName(rs1), R(rs1), RegisterName(rs2),
-            R(rs2));
     R(rd) = R(rs1) & R(rs2);
 }
 
@@ -377,7 +335,7 @@ void RiscVM::VM::ECALL()
     switch (R(a7))
     {
     case 93:
-        m_Running = false;
+        m_Ok = false;
         m_Status = R(a0);
         break;
     default:

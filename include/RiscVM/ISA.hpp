@@ -245,6 +245,7 @@ namespace RiscVM
         };
     }
 
+    uint32_t ImmBits(uint32_t data, uint32_t end, uint32_t beg);
     uint32_t Extend(uint32_t bit, uint32_t n);
 
     uint32_t Rd(uint32_t);

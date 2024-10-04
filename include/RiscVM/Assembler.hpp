@@ -3,6 +3,8 @@
 #include <map>
 #include <vector>
 #include <RiscVM/RiscVM.hpp>
+#include <RiscVM/Section.hpp>
+#include <RiscVM/Symbol.hpp>
 
 namespace RiscVM
 {
@@ -38,7 +40,7 @@ namespace RiscVM
     public:
         explicit Assembler(std::istream& stream);
 
-        void Link(VM& vm);
+        std::vector<char> Link();
 
         void Parse();
         void ParseLabel();

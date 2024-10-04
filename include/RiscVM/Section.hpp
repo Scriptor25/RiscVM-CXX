@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <RiscVM/Instruction.hpp>
 #include <RiscVM/RiscVM.hpp>
 
 namespace RiscVM

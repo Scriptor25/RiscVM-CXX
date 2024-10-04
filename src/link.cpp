@@ -3,9 +3,8 @@
 #include <RiscVM/ISA.hpp>
 #include <RiscVM/Operand.hpp>
 #include <RiscVM/Section.hpp>
-#include <RiscVM/VM.hpp>
 
-void RiscVM::Assembler::Link(VM& vm)
+std::vector<char> RiscVM::Assembler::Link()
 {
     auto& text = m_Sections[".text"];
     text.Offset = 0;
@@ -199,5 +198,5 @@ void RiscVM::Assembler::Link(VM& vm)
         }
     }
 
-    vm.Load(dest.data(), dest.size());
+    return std::move(dest);
 }

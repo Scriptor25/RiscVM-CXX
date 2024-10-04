@@ -11,6 +11,7 @@ namespace RiscVM
 
         void Load(const char* pgm, size_t len);
         bool Cycle();
+        [[nodiscard]] bool Ok() const;
 
         char* Memory();
         [[nodiscard]] int32_t Status() const;
@@ -90,7 +91,7 @@ namespace RiscVM
         int32_t m_PC{};
         int8_t m_Memory[0x8000]{};
         bool m_DirtyPC = false;
-        bool m_Running = true;
+        bool m_Ok = true;
         int32_t m_Status = 0;
     };
 }
