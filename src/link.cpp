@@ -9,18 +9,19 @@ std::vector<char> RiscVM::Assembler::Link()
     auto& text = m_Sections[".text"];
     text.Offset = 0;
     auto& data = m_Sections[".data"];
-    data.Offset = text.Offset + text.Size;
+    data.Offset = text.Offset + text.Size();
     auto& rodata = m_Sections[".rodata"];
-    rodata.Offset = data.Offset + data.Size;
+    rodata.Offset = data.Offset + data.Size();
     auto& bss = m_Sections[".bss"];
-    bss.Offset = rodata.Offset + rodata.Size;
+    bss.Offset = rodata.Offset + rodata.Size();
 
-    std::vector<char> dest(bss.Offset + bss.Size);
+    std::vector<char> dest(bss.Offset + bss.Size());
 
     for (auto& [name, section] : m_Sections)
     {
         if (section.Offset < 0) continue;
-        for (auto& [offset, rv, operands] : section.InstructionList)
+        memcpy(dest.data() + section.Offset, section.Data.data(), section.Data.size());
+        for (auto& [offset, rv, operands] : section.Instructions)
         {
             const auto ptr = reinterpret_cast<uint32_t*>(dest.data() + section.Offset + offset);
             const auto i = static_cast<uint32_t>(rv);

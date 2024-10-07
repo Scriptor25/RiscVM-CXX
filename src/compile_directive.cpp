@@ -1,5 +1,4 @@
 #include <RiscVM/Assembler.hpp>
-#include <RiscVM/Instruction.hpp>
 #include <RiscVM/Operand.hpp>
 #include <RiscVM/Section.hpp>
 
@@ -15,14 +14,25 @@ void RiscVM::Assembler::ParseCompileDirective()
     if (directive == ".skip")
     {
         const auto n = Expect(TokenType_Immediate).Immediate;
-        m_ActiveSection->Size += n;
+        m_ActiveSection->Skip(n);
         return;
     }
     if (directive == ".align")
     {
         const auto n = Expect(TokenType_Immediate).Immediate;
-        if (const auto rem = m_ActiveSection->Size % n)
-            m_ActiveSection->Size += n - rem;
+        if (const auto rem = m_ActiveSection->Size() % n)
+            m_ActiveSection->Skip(n - rem);
+        return;
+    }
+    if (directive == ".ascii")
+    {
+        do
+            if (At(TokenType_Immediate))
+                m_ActiveSection->Data.push_back(static_cast<char>(Skip().Immediate));
+            else
+                for (auto str = Expect(TokenType_Char).Value; const auto c : str)
+                    m_ActiveSection->Data.push_back(c);
+        while (NextAt(TokenType_Comma));
         return;
     }
 

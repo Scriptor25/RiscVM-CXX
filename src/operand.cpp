@@ -139,7 +139,7 @@ RiscVM::OperandPtr RiscVM::Assembler::ParseOperand()
             const auto reg = GetRegister(symbol);
             return Reg(reg);
         }
-        return Sub(Sym(m_SymbolTable[symbol]), Imm(static_cast<int32_t>(m_ActiveSection->Size)));
+        return Sub(Sym(m_SymbolTable[symbol]), Imm(static_cast<int32_t>(m_ActiveSection->Size())));
     }
 
     if (At(TokenType_Immediate))

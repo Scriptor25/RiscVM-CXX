@@ -9,6 +9,7 @@ namespace RiscVM
     public:
         int32_t& R(uint32_t);
 
+        void Reset();
         void Load(const char* pgm, size_t len);
         bool Cycle();
         [[nodiscard]] bool Ok() const;
@@ -89,7 +90,7 @@ namespace RiscVM
     private:
         int32_t m_Registers[32]{};
         int32_t m_PC{};
-        int8_t m_Memory[0x8000]{};
+        char m_Memory[0x8000]{};
         bool m_DirtyPC = false;
         bool m_Ok = true;
         int32_t m_Status = 0;

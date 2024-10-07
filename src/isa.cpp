@@ -381,7 +381,7 @@ RiscVM::RV32IM RiscVM::GetInstruction(const std::string& name)
 
 RiscVM::RV32IM RiscVM::GetInstruction(const uint32_t data)
 {
-    auto rv = static_cast<RV32IM>(0xffffffff);
+    auto rv = static_cast<RV32IM>(0);
     switch (data & 0b1111111)
     {
     case RV32_64G_OP:

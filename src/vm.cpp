@@ -7,32 +7,35 @@
 int32_t& RiscVM::VM::R(const uint32_t r)
 {
     if (r == 0)
-        m_Registers[0] = 0;
+        return m_Registers[0] = 0;
     return m_Registers[r];
+}
+
+void RiscVM::VM::Reset()
+{
+    m_PC = 0;
+    m_DirtyPC = false;
+    m_Ok = true;
 }
 
 void RiscVM::VM::Load(const char* pgm, const size_t len)
 {
     memcpy(m_Memory, pgm, len);
-    m_PC = 0;
-    m_Ok = true;
 }
 
 bool RiscVM::VM::Cycle()
 {
-    if (m_Ok && m_PC >= 0 && m_PC < 4096)
+    if (m_Ok && m_PC >= 0 && m_PC < 0x8000)
     {
-        const auto inst = *reinterpret_cast<uint32_t*>(&m_Memory[m_PC]);
-        const auto pc = m_PC;
+        const auto inst = *reinterpret_cast<uint32_t*>(m_Memory + m_PC);
         Exec(inst);
         if (!m_DirtyPC)
             m_PC += 4;
-        m_DirtyPC = false;
+        else m_DirtyPC = false;
         return true;
     }
 
-    m_Ok = false;
-    return false;
+    return m_Ok = false;
 }
 
 bool RiscVM::VM::Ok() const
@@ -42,7 +45,7 @@ bool RiscVM::VM::Ok() const
 
 char* RiscVM::VM::Memory()
 {
-    return reinterpret_cast<char*>(m_Memory);
+    return m_Memory;
 }
 
 int32_t RiscVM::VM::Status() const
@@ -109,6 +112,7 @@ void RiscVM::VM::Exec(const uint32_t data)
     case RV32IM_DIVU: return DIVU(Rd(data), Rs1(data), Rs2(data));
     case RV32IM_REM: return REM(Rd(data), Rs1(data), Rs2(data));
     case RV32IM_REMU: return REMU(Rd(data), Rs1(data), Rs2(data));
+    default: throw std::runtime_error("no such opcode");
     }
 }
 
@@ -334,6 +338,13 @@ void RiscVM::VM::ECALL()
 {
     switch (R(a7))
     {
+    case 64:
+        {
+            const auto buf = R(a0);
+            const auto count = R(a1);
+            printf("%.*s", count, m_Memory + buf);
+        }
+        break;
     case 93:
         m_Ok = false;
         m_Status = R(a0);
@@ -345,7 +356,6 @@ void RiscVM::VM::ECALL()
 
 void RiscVM::VM::EBREAK()
 {
-    __debugbreak();
 }
 
 void RiscVM::VM::FENCEI(uint32_t rd, uint32_t rs1, uint32_t imm)

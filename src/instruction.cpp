@@ -1,5 +1,4 @@
 #include <RiscVM/Assembler.hpp>
-#include <RiscVM/Instruction.hpp>
 #include <RiscVM/ISA.hpp>
 #include <RiscVM/Operand.hpp>
 #include <RiscVM/Section.hpp>
@@ -20,9 +19,8 @@ void RiscVM::Assembler::ParseInstruction()
     if (!rv)
         throw std::runtime_error("no such instruction");
 
-    const auto offset = m_ActiveSection->Size;
-    const Instruction instruction{offset, rv, operands};
-    m_ActiveSection->PushBack(instruction);
+    const auto offset = m_ActiveSection->Size();
+    m_ActiveSection->EmplaceBack(offset, rv, operands);
 }
 
 bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vector<OperandPtr>& operands) const
@@ -38,15 +36,13 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rd);
         operands.push_back(rd);
         operands.push_back(Bits(sym, 11, 0, true));
-        Instruction addi{m_ActiveSection->Size, RV32IM_ADDI, operands};
-        m_ActiveSection->PushBack(addi);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_ADDI, operands);
 
         return true;
     }
@@ -63,14 +59,12 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rt);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        Instruction load{m_ActiveSection->Size, RV32IM_LB, operands};
-        m_ActiveSection->PushBack(load);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_LB, operands);
 
         return true;
     }
@@ -83,14 +77,12 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        Instruction load{m_ActiveSection->Size, RV32IM_LH, operands};
-        m_ActiveSection->PushBack(load);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_LH, operands);
 
         return true;
     }
@@ -103,14 +95,12 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        Instruction load{m_ActiveSection->Size, RV32IM_LW, operands};
-        m_ActiveSection->PushBack(load);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_LW, operands);
 
         return true;
     }
@@ -123,14 +113,12 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        Instruction load{m_ActiveSection->Size, RV32IM_LBU, operands};
-        m_ActiveSection->PushBack(load);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_LBU, operands);
 
         return true;
     }
@@ -143,14 +131,12 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        Instruction load{m_ActiveSection->Size, RV32IM_LHU, operands};
-        m_ActiveSection->PushBack(load);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_LHU, operands);
 
         return true;
     }
@@ -167,14 +153,12 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rt);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rs);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        Instruction store{m_ActiveSection->Size, RV32IM_SB, operands};
-        m_ActiveSection->PushBack(store);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_SB, operands);
 
         return true;
     }
@@ -187,14 +171,12 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rt);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rs);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        Instruction store{m_ActiveSection->Size, RV32IM_SH, operands};
-        m_ActiveSection->PushBack(store);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_SH, operands);
 
         return true;
     }
@@ -207,14 +189,12 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rt);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rs);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        Instruction store{m_ActiveSection->Size, RV32IM_SW, operands};
-        m_ActiveSection->PushBack(store);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_SW, operands);
 
         return true;
     }
@@ -226,8 +206,7 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.push_back(Reg(zero));
         operands.push_back(Reg(zero));
         operands.push_back(Imm(0));
-        Instruction instruction{m_ActiveSection->Size, RV32IM_ADDI, operands};
-        m_ActiveSection->PushBack(instruction);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_ADDI, operands);
         return true;
     }
 
@@ -242,15 +221,13 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(rd);
         operands.push_back(Add(Bits(imm, 31, 12, false), Bits(imm, 11, 11, false)));
-        Instruction lui{m_ActiveSection->Size, RV32IM_LUI, operands};
-        m_ActiveSection->PushBack(lui);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_LUI, operands);
 
         operands.clear();
         operands.push_back(rd);
         operands.push_back(rd);
         operands.push_back(Bits(imm, 11, 0, true));
-        Instruction addi{m_ActiveSection->Size, RV32IM_ADDI, operands};
-        m_ActiveSection->PushBack(addi);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_ADDI, operands);
 
         return true;
     }
@@ -260,8 +237,7 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
     if (name == "mv" && operands.size() == 2)
     {
         operands.push_back(Imm(0));
-        Instruction instruction{m_ActiveSection->Size, RV32IM_ADDI, operands};
-        m_ActiveSection->PushBack(instruction);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_ADDI, operands);
 
         return true;
     }
@@ -275,8 +251,7 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(Reg(zero));
         operands.push_back(sym);
-        Instruction instruction{m_ActiveSection->Size, RV32IM_JAL, operands};
-        m_ActiveSection->PushBack(instruction);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_JAL, operands);
 
         return true;
     }
@@ -290,8 +265,7 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(Reg(ra));
         operands.push_back(sym);
-        Instruction instruction{m_ActiveSection->Size, RV32IM_JAL, operands};
-        m_ActiveSection->PushBack(instruction);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_JAL, operands);
 
         return true;
     }
@@ -305,8 +279,7 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(Reg(zero));
         operands.push_back(Off(Imm(0), rs1));
-        Instruction instruction{m_ActiveSection->Size, RV32IM_JALR, operands};
-        m_ActiveSection->PushBack(instruction);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_JALR, operands);
 
         return true;
     }
@@ -320,8 +293,7 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
         operands.clear();
         operands.push_back(Reg(ra));
         operands.push_back(Off(Imm(0), rs1));
-        Instruction instruction{m_ActiveSection->Size, RV32IM_JALR, operands};
-        m_ActiveSection->PushBack(instruction);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_JALR, operands);
 
         return true;
     }
@@ -332,8 +304,7 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
     {
         operands.push_back(Reg(zero));
         operands.push_back(Off(Imm(0), Reg(ra)));
-        Instruction instruction{m_ActiveSection->Size, RV32IM_JALR, operands};
-        m_ActiveSection->PushBack(instruction);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_JALR, operands);
 
         return true;
     }
@@ -343,19 +314,17 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
     // jalr  ra,(sym-pc)[11:0](ra)
     if (name == "call" && operands.size() == 1)
     {
-        const auto sym = Sub(operands[0], Imm(4));
+        const auto sym = operands[0];
 
         operands.clear();
         operands.push_back(Reg(ra));
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(Reg(ra));
         operands.push_back(Off(Bits(sym, 11, 0, true), Reg(ra)));
-        Instruction jalr{m_ActiveSection->Size, RV32IM_JALR, operands};
-        m_ActiveSection->PushBack(jalr);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_JALR, operands);
 
         return true;
     }
@@ -365,19 +334,17 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
     // jalr  zero,(sym-pc)[11:0](t1)
     if (name == "tail" && operands.size() == 1)
     {
-        const auto sym = Sub(operands[0], Imm(4));
+        const auto sym = operands[0];
 
         operands.clear();
         operands.push_back(Reg(t1));
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        Instruction auipc{m_ActiveSection->Size, RV32IM_AUIPC, operands};
-        m_ActiveSection->PushBack(auipc);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_AUIPC, operands);
 
         operands.clear();
         operands.push_back(Reg(zero));
         operands.push_back(Off(Bits(sym, 11, 0, true), Reg(t1)));
-        Instruction jalr{m_ActiveSection->Size, RV32IM_JALR, operands};
-        m_ActiveSection->PushBack(jalr);
+        m_ActiveSection->EmplaceBack(m_ActiveSection->Size(), RV32IM_JALR, operands);
 
         return true;
     }

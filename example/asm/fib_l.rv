@@ -4,9 +4,9 @@
 
 .section .text
 _start:
-    li   a0,10      ; n = 10
+    addi a0,zero,10 ; n = 10
     call fib        ; x = fib(n)
-    li   a7,93
+    addi a7,zero,93
     ecall           ; exit(x)
 
 ;
@@ -15,9 +15,9 @@ _start:
 ;  a0: n
 ;
 fib:
-    li   t0,0       ; a = 0
-    li   t1,1       ; b = 0
-    li   t2,0       ; i = 0
+    addi t0,zero,0  ; a = 0
+    addi t1,zero,1  ; b = 0
+    addi t2,zero,0  ; i = 0
 loop:
     bge  t2,a0,end  ; if i >= n goto end
     addi t2,t2,1    ; i++
