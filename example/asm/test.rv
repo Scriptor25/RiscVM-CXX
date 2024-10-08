@@ -1,13 +1,13 @@
 .section .rodata
-message: .ascii 'Hello World!',10,0
+message: .ascii 'Hello World!',0
 
 .section .text
 _start:
-    li   a0,message
-    li   a1,13
-    li   a7,64
+    la   a0,message
+    addi a1,zero,12
+    addi a7,zero,1
     ecall
 
-    li   a0,123
-    li   a7,93
+    addi a0,zero,123
+    addi a7,zero,127
     ecall

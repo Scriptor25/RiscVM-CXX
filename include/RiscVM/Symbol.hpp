@@ -8,5 +8,6 @@ namespace RiscVM
     {
         Section* Base;
         uint32_t Offset;
+        bool Global = false;
     };
 }

@@ -6,7 +6,7 @@
 _start:
     addi a0,zero,10 ; n = 10
     call fib        ; x = fib(n)
-    addi a7,zero,93
+    addi a7,zero,127
     ecall           ; exit(x)
 
 ;

@@ -10,19 +10,19 @@ stack_bottom:
 .section .text
 _start:
     ; setup stack
-    la sp,stack_bottom
+    la   sp,stack_bottom
 
     ; fib(10)
-    li a0,10
+    addi a0,zero,10
     call fib
 
     ; exit
-    li a7,93
+    addi a7,zero,127
     ecall
 
 fib:
     ; if n < 2 goto less_2
-    li   t0,2
+    addi t0,zero,2
     blt  a0,t0,less_2
 
     ; push ra, a0, s0
@@ -54,13 +54,13 @@ fib:
     ret
 less_2:
     ; if n < 1 goto less_1
-    li   t0,1
+    addi t0,zero,1
     blt  a0,t0,less_1
 
     ; return 1
-    li   a0,1
+    addi a0,zero,1
     ret
 less_1:
     ; return 0
-    li   a0,0
+    addi a0,zero,0
     ret

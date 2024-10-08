@@ -11,6 +11,12 @@ void RiscVM::Assembler::ParseCompileDirective()
         m_ActiveSection = &m_Sections[section];
         return;
     }
+    if (directive == ".globl")
+    {
+        const auto label = Expect(TokenType_Symbol).Value;
+        m_SymbolTable[label].Global = true;
+        return;
+    }
     if (directive == ".skip")
     {
         const auto n = Expect(TokenType_Immediate).Immediate;

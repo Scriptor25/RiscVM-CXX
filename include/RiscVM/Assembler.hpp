@@ -13,8 +13,10 @@ namespace RiscVM
         TokenType_EOF = -1,
         TokenType_NewLine,
         TokenType_Label,
+        TokenType_RelativeLabel,
         TokenType_CompileDirective,
         TokenType_Symbol,
+        TokenType_RelativeSymbol,
         TokenType_Immediate,
         TokenType_Char,
 
@@ -44,6 +46,7 @@ namespace RiscVM
 
         void Parse();
         void ParseLabel();
+        void ParseRelativeLabel();
         void ParseCompileDirective();
         void ParseInstruction();
         bool ParsePseudoInstruction(const std::string& name, std::vector<OperandPtr>& operands) const;
@@ -66,5 +69,8 @@ namespace RiscVM
 
         std::map<std::string, Section> m_Sections;
         std::map<std::string, Symbol> m_SymbolTable;
+
+        Symbol* m_RelativeBase{};
+        std::map<uint32_t, Symbol> m_RelativeSymbolTable;
     };
 }

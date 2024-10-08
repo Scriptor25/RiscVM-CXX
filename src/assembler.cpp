@@ -2,7 +2,6 @@
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 #include <RiscVM/Section.hpp>
-#include <RiscVM/Symbol.hpp>
 
 std::ostream& RiscVM::operator<<(std::ostream& os, const TokenType& type)
 {
@@ -43,6 +42,8 @@ void RiscVM::Assembler::Parse()
 
     if (At(TokenType_Label))
         ParseLabel();
+    else if (At(TokenType_RelativeLabel))
+        ParseRelativeLabel();
 
     if (At(TokenType_Symbol))
     {
@@ -63,7 +64,19 @@ void RiscVM::Assembler::Parse()
 void RiscVM::Assembler::ParseLabel()
 {
     const auto label = Expect(TokenType_Label).Value;
-    m_SymbolTable[label] = {m_ActiveSection, m_ActiveSection->Size()};
+    auto& [base, offset, global] = m_SymbolTable[label];
+    base = m_ActiveSection;
+    offset = m_ActiveSection->Size();
+
+    m_RelativeBase = &m_SymbolTable[label];
+}
+
+void RiscVM::Assembler::ParseRelativeLabel()
+{
+    const auto label = Expect(TokenType_RelativeLabel).Immediate;
+    auto& [base, offset, global] = m_RelativeSymbolTable[reinterpret_cast<intptr_t>(m_RelativeBase) + label];
+    base = m_ActiveSection;
+    offset = m_ActiveSection->Size();
 }
 
 int RiscVM::Assembler::Get() const

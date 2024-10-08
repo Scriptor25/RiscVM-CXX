@@ -123,10 +123,7 @@ RiscVM::Token& RiscVM::Assembler::Next()
                     break;
                 }
                 const auto imm = static_cast<uint32_t>(std::stoul(value, nullptr, 2));
-                return m_Token = {
-                    .Type = TokenType_Immediate,
-                    .Immediate = imm,
-                };
+                return m_Token = {.Type = TokenType_Immediate, .Immediate = imm};
             }
 
         case State_Oct:
@@ -137,10 +134,7 @@ RiscVM::Token& RiscVM::Assembler::Next()
                     break;
                 }
                 const auto imm = static_cast<uint32_t>(std::stoul(value, nullptr, 8));
-                return m_Token = {
-                    .Type = TokenType_Immediate,
-                    .Immediate = imm,
-                };
+                return m_Token = {.Type = TokenType_Immediate, .Immediate = imm};
             }
 
         case State_Dec:
@@ -151,10 +145,17 @@ RiscVM::Token& RiscVM::Assembler::Next()
                     break;
                 }
                 const auto imm = static_cast<uint32_t>(std::stoul(value, nullptr, 10));
-                return m_Token = {
-                    .Type = TokenType_Immediate,
-                    .Immediate = imm
-                };
+                if (m_C == '$')
+                {
+                    m_C = Get();
+                    return m_Token = {.Type = TokenType_RelativeSymbol, .Immediate = imm};
+                }
+                if (m_C == ':')
+                {
+                    m_C = Get();
+                    return m_Token = {.Type = TokenType_RelativeLabel, .Immediate = imm};
+                }
+                return m_Token = {.Type = TokenType_Immediate, .Immediate = imm};
             }
 
         case State_Hex:
@@ -165,10 +166,7 @@ RiscVM::Token& RiscVM::Assembler::Next()
                     break;
                 }
                 const auto imm = static_cast<uint32_t>(std::stoul(value, nullptr, 16));
-                return m_Token = {
-                    .Type = TokenType_Immediate,
-                    .Immediate = imm,
-                };
+                return m_Token = {.Type = TokenType_Immediate, .Immediate = imm};
             }
 
         case State_Char:

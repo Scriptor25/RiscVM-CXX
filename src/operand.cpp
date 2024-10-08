@@ -142,6 +142,14 @@ RiscVM::OperandPtr RiscVM::Assembler::ParseOperand()
         return Sub(Sym(m_SymbolTable[symbol]), Imm(static_cast<int32_t>(m_ActiveSection->Size())));
     }
 
+    if (At(TokenType_RelativeSymbol))
+    {
+        const auto symbol = Skip().Immediate;
+        return Sub(
+            Sym(m_RelativeSymbolTable[reinterpret_cast<intptr_t>(m_RelativeBase) + symbol]),
+            Imm(static_cast<int32_t>(m_ActiveSection->Size())));
+    }
+
     if (At(TokenType_Immediate))
     {
         const auto immediate = Skip().Immediate;
@@ -153,6 +161,12 @@ RiscVM::OperandPtr RiscVM::Assembler::ParseOperand()
             return Off(operand, base);
         }
         return operand;
+    }
+
+    if (At(TokenType_Char))
+    {
+        const auto c = Skip().Value;
+        return Imm(c.front());
     }
 
     if (NextAt(TokenType_Dot))

@@ -1,5 +1,6 @@
 #include <cstring>
 #include <iostream>
+#include <random>
 #include <RiscVM/ISA.hpp>
 #include <RiscVM/RiscVM.hpp>
 #include <RiscVM/VM.hpp>
@@ -338,14 +339,34 @@ void RiscVM::VM::ECALL()
 {
     switch (R(a7))
     {
-    case 64:
+    case 0: // putchar
+        putchar(R(a0));
+        fflush(stdout);
+        break;
+    case 1: // puts
+        puts(m_Memory + R(a0));
+        fflush(stdout);
+        break;
+    case 2: // printf
+        vprintf(m_Memory + R(a0), m_Memory + R(a1));
+        fflush(stdout);
+        break;
+    case 3: // getchar
+        R(a0) = getchar();
+        break;
+    case 4: // gets
+        fgets(m_Memory + R(a0), R(a1), stdin);
+        break;
+    case 5: // scanf
+        scanf(m_Memory + R(a0), m_Memory + R(a1));
+        break;
+    case 120: // random
         {
-            const auto buf = R(a0);
-            const auto count = R(a1);
-            printf("%.*s", count, m_Memory + buf);
+            const auto t = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+            R(a0) = R(a0) + static_cast<int32_t>(static_cast<float>(R(a1) - R(a0)) * t);
         }
         break;
-    case 93:
+    case 127:
         m_Ok = false;
         m_Status = R(a0);
         break;

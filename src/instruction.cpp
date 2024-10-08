@@ -31,7 +31,7 @@ bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vec
     if (name == "la" && operands.size() == 2)
     {
         const auto rd = operands[0];
-        const auto sym = Sub(operands[1], Imm(4));
+        const auto sym = operands[1];
 
         operands.clear();
         operands.push_back(rd);
