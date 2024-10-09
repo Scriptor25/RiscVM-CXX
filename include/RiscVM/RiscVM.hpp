@@ -12,5 +12,6 @@ namespace RiscVM
     typedef std::shared_ptr<Operand> OperandPtr;
 
     struct Section;
+    struct SymbolBase;
     struct Symbol;
 }

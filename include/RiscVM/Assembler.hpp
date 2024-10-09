@@ -13,10 +13,8 @@ namespace RiscVM
         TokenType_EOF = -1,
         TokenType_NewLine,
         TokenType_Label,
-        TokenType_RelativeLabel,
         TokenType_CompileDirective,
         TokenType_Symbol,
-        TokenType_RelativeSymbol,
         TokenType_Immediate,
         TokenType_Char,
 
@@ -24,7 +22,7 @@ namespace RiscVM
         TokenType_Comma,
         TokenType_ParenOpen,
         TokenType_ParenClose,
-        TokenType_Minus,
+        TokenType_Operator,
     };
 
     struct Token
@@ -46,19 +44,31 @@ namespace RiscVM
 
         void Parse();
         void ParseLabel();
-        void ParseRelativeLabel();
         void ParseCompileDirective();
         void ParseInstruction();
+
         bool ParsePseudoInstruction(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParsePseudoLA(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParsePseudoLoad(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParsePseudoStore(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParsePseudoNOP(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParsePseudoLI(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParsePseudoMV(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParsePseudoJump(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParsePseudoCall(const std::string& name, std::vector<OperandPtr>& operands) const;
 
         OperandPtr ParseOperand();
+        OperandPtr ParsePrimary();
+        OperandPtr ParseBinary(OperandPtr lhs, int min_pre);
 
         [[nodiscard]] int Get() const;
         Token& Next();
         Token Skip();
         Token Expect(TokenType);
         [[nodiscard]] bool At(TokenType) const;
+        [[nodiscard]] bool At(const std::string&) const;
         bool NextAt(TokenType);
+        bool NextAt(const std::string&);
 
     private:
         std::istream& m_Stream;
@@ -71,6 +81,5 @@ namespace RiscVM
         std::map<std::string, Symbol> m_SymbolTable;
 
         Symbol* m_RelativeBase{};
-        std::map<uint32_t, Symbol> m_RelativeSymbolTable;
     };
 }

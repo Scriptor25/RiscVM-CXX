@@ -69,8 +69,6 @@ namespace RiscVM
         void ECALL();
         void EBREAK();
 
-        void FENCEI(uint32_t rd, uint32_t rs1, uint32_t imm);
-
         void CSRRW(uint32_t rd, uint32_t rs1, uint32_t csr);
         void CSRRS(uint32_t rd, uint32_t rs1, uint32_t csr);
         void CSRRC(uint32_t rd, uint32_t rs1, uint32_t csr);

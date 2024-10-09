@@ -10,6 +10,7 @@ namespace RiscVM
     {
         void PushBack(const Instruction&);
         void EmplaceBack(uint32_t offset, RV32IM rv, const std::vector<OperandPtr>& operands);
+        void EmplaceBack(RV32IM rv, const std::vector<OperandPtr>& operands);
         void Skip(size_t n);
         [[nodiscard]] uint32_t Size() const;
 

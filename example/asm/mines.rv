@@ -1,0 +1,227 @@
+.set WIDTH  10
+.set HEIGHT 10
+.set MINES  10
+
+.section .bss
+field: .skip (WIDTH * HEIGHT)
+
+stack_top:
+.skip 0x1000
+stack_bottom:
+
+.section .text
+_start:
+    ; setup stack
+    la   sp,stack_bottom
+
+    call place_mines
+    call print_field
+
+    addi a0,zero,0
+    call exit
+
+;
+; void place_mines()
+;
+place_mines:
+    push ra
+
+    addi t0,zero,0
+.0:
+    addi t1,zero,MINES
+    bge  t0,t1,.1
+
+    ; load random cell
+    ; if cell already is a mine, continue
+    ; flip mine bit of cell
+    ; store cell
+
+    addi t0,t0,1
+    j    .0
+.1:
+    pop ra
+    ret
+
+;
+; void print_field()
+;
+print_field:
+    push ra,s0,s1
+
+    ; first line: <column index 0-F>...
+    addi a0,zero,0x20
+    call putchar
+    addi a0,zero,0x20
+    call putchar
+
+    addi s0,zero,0
+.0: ; for each column in row
+    addi t0,zero,WIDTH
+    bge  s0,t0,.1
+
+    addi a0,s0,0x30
+    call putchar
+    addi a0,zero,0x20
+    call putchar
+
+    addi s0,s0,1
+    j    .0
+.1: ; end for each column
+
+    ; new line
+    addi a0,zero,0xa
+    call putchar
+
+    ; each line: <row index 0-F> <cell at (column|row)>...
+    addi s0,zero,0
+.2: ; for each row in field
+    addi t0,zero,HEIGHT
+    bge  s0,t0,.5
+
+    addi a0,s0,0x30
+    call putchar
+    addi a0,zero,0x20
+    call putchar
+
+    addi s1,zero,0
+.3: ; for each column in row
+    addi t0,zero,WIDTH
+    bge  s1,t0,.4
+
+    mv   a0,s1
+    mv   a1,s0
+    call print_cell
+
+    addi s1,s1,1
+    j    .3
+.4: ; end for each column
+    ; new line
+    addi a0,zero,0xa
+    call putchar
+
+    addi s0,s0,1
+    j    .2
+.5: ; end for each row
+
+    pop s1,s0,ra
+    ret
+
+;
+; void print_cell(int x, int y)
+;
+print_cell:
+    push ra
+
+    call load_cell
+    mv   t0,a0
+
+    ; bit 0 -> is mine [t1]
+    ; bit 1 -> is open [t2]
+    ; bit 2 -> is flag [t3]
+    ; if is flag     -> 'F'
+    ; if not is open -> '#'
+    ; if is open
+    ;  if is mine    -> '*'
+    ;  else          -> '_'
+    andi t1,t0,0b001
+    andi t2,t0,0b010
+    srai t2,t2,1
+    andi t3,t0,0b100
+    srai t3,t3,2
+
+    ; store char in [t0]
+    bne  t3,zero,.0
+    bne  t2,zero,.1
+    addi t0,zero,'#'
+    j    .3
+.0: addi t0,zero,'F'
+    j    .3
+.1: bne  t1,zero,.2
+    addi t0,zero,'_'
+    j    .3
+.2: addi t0,zero,'*'
+    j    .3
+.3: ; print char from [t0]
+    mv   a0,t0
+    call putchar
+    addi a0,zero,0x20
+    call putchar
+
+    pop ra
+    ret
+
+;
+; int load_cell(int x, int y)
+;
+load_cell:
+    addi t0,zero,WIDTH
+    mul  t0,t0,a1
+    add  t0,t0,a0
+    la   t1,field
+    add  t0,t0,t1
+    lb   a0,0(t0)
+    ret
+
+;
+; void store_cell(int x, int y, int c)
+;
+store_cell:
+    addi t0,zero,WIDTH
+    mul  t0,t0,a1
+    add  t0,t0,a0
+    la   t1,field
+    add  t0,t0,t1
+    sb   a2,0(t0)
+    ret
+
+;
+; int get_char(int c)
+;
+get_char:
+    ret
+
+;
+; int is_mine(int c)
+;
+is_mine:
+    andi a0,a0,0b001
+    ret
+
+;
+; int is_open(int c)
+;
+is_open:
+    andi a0,a0,0b010
+    srai a0,a0,1
+    ret
+
+;
+; int is_flag(int c)
+;
+is_flag:
+    andi a0,a0,0b100
+    srai a0,a0,2
+    ret
+
+;
+; void putchar(int c)
+;
+putchar:
+    addi a7,zero,0
+    ecall
+    ret
+
+;
+; int random(int min, int max)
+;
+random:
+    addi a7,zero,120
+    ecall
+    ret
+
+;
+; exit(int status)
+;
+exit:
+    addi a7,zero,127
+    ecall

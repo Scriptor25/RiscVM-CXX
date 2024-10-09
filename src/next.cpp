@@ -38,7 +38,7 @@ RiscVM::Token& RiscVM::Assembler::Next()
 
             case '.':
                 m_C = Get();
-                if (isalpha(m_C))
+                if (isalnum(m_C))
                 {
                     state = State_Symbol;
                     value += '.';
@@ -58,9 +58,22 @@ RiscVM::Token& RiscVM::Assembler::Next()
                 m_C = Get();
                 return m_Token = {.Type = TokenType_ParenClose};
 
+            case '+':
             case '-':
-                m_C = Get();
-                return m_Token = {.Type = TokenType_Minus};
+            case '*':
+            case '/':
+            case '%':
+            case '&':
+            case '|':
+            case '^':
+            case '=':
+            case '<':
+            case '>':
+                {
+                    value += static_cast<char>(m_C);
+                    m_C = Get();
+                    return m_Token = {.Type = TokenType_Operator, .Value = value};
+                }
 
             case '0':
                 m_C = Get();
@@ -145,16 +158,6 @@ RiscVM::Token& RiscVM::Assembler::Next()
                     break;
                 }
                 const auto imm = static_cast<uint32_t>(std::stoul(value, nullptr, 10));
-                if (m_C == '$')
-                {
-                    m_C = Get();
-                    return m_Token = {.Type = TokenType_RelativeSymbol, .Immediate = imm};
-                }
-                if (m_C == ':')
-                {
-                    m_C = Get();
-                    return m_Token = {.Type = TokenType_RelativeLabel, .Immediate = imm};
-                }
                 return m_Token = {.Type = TokenType_Immediate, .Immediate = imm};
             }
 

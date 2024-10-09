@@ -25,11 +25,11 @@ namespace RiscVM
 
     struct SymbolOperand : Operand
     {
-        explicit SymbolOperand(Symbol& sym);
+        explicit SymbolOperand(SymbolBase* sym);
 
         [[nodiscard]] int32_t AsImmediate() const override;
 
-        Symbol& Sym;
+        SymbolBase* Sym;
     };
 
     struct RegisterOperand : Operand
@@ -61,31 +61,23 @@ namespace RiscVM
         bool SignExt;
     };
 
-    struct AddOperand : Operand
+    struct BinOperand : Operand
     {
-        AddOperand(OperandPtr lhs, OperandPtr rhs);
+        BinOperand(std::string op, OperandPtr lhs, OperandPtr rhs);
 
         [[nodiscard]] int32_t AsImmediate() const override;
 
-        OperandPtr Lhs;
-        OperandPtr Rhs;
-    };
-
-    struct SubOperand : Operand
-    {
-        SubOperand(OperandPtr lhs, OperandPtr rhs);
-
-        [[nodiscard]] int32_t AsImmediate() const override;
-
+        std::string Op;
         OperandPtr Lhs;
         OperandPtr Rhs;
     };
 
     OperandPtr Imm(int32_t imm);
-    OperandPtr Sym(Symbol& sym);
+    OperandPtr Sym(SymbolBase* sym);
     OperandPtr Reg(Register reg);
     OperandPtr Off(const OperandPtr& offset, const OperandPtr& base);
     OperandPtr Bits(const OperandPtr& imm, uint32_t end, uint32_t beg, bool sign_ext);
+    OperandPtr Bin(const std::string& op, const OperandPtr& lhs, const OperandPtr& rhs);
     OperandPtr Add(const OperandPtr& lhs, const OperandPtr& rhs);
     OperandPtr Sub(const OperandPtr& lhs, const OperandPtr& rhs);
 }

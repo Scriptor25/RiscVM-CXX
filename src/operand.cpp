@@ -1,3 +1,4 @@
+#include <unordered_map>
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 #include <RiscVM/Section.hpp>
@@ -24,15 +25,14 @@ int32_t RiscVM::ImmediateOperand::AsImmediate() const
     return Immediate;
 }
 
-RiscVM::SymbolOperand::SymbolOperand(Symbol& sym)
+RiscVM::SymbolOperand::SymbolOperand(SymbolBase* sym)
     : Sym(sym)
 {
 }
 
 int32_t RiscVM::SymbolOperand::AsImmediate() const
 {
-    if (!Sym.Base) return 0;
-    return static_cast<int32_t>(Sym.Base->Offset + Sym.Offset);
+    return static_cast<int32_t>((reinterpret_cast<intptr_t>(Sym->Base) > 1 ? Sym->Base->Offset : 0) + Sym->Offset);
 }
 
 RiscVM::RegisterOperand::RegisterOperand(const Register reg)
@@ -74,24 +74,32 @@ int32_t RiscVM::BitsOperand::AsImmediate() const
     return imm >> Beg & mask;
 }
 
-RiscVM::AddOperand::AddOperand(OperandPtr lhs, OperandPtr rhs)
-    : Lhs(std::move(lhs)), Rhs(std::move(rhs))
+RiscVM::BinOperand::BinOperand(std::string op, OperandPtr lhs, OperandPtr rhs)
+    : Op(std::move(op)), Lhs(std::move(lhs)), Rhs(std::move(rhs))
 {
 }
 
-int32_t RiscVM::AddOperand::AsImmediate() const
+int32_t RiscVM::BinOperand::AsImmediate() const
 {
-    return Lhs->AsImmediate() + Rhs->AsImmediate();
-}
-
-RiscVM::SubOperand::SubOperand(OperandPtr lhs, OperandPtr rhs)
-    : Lhs(std::move(lhs)), Rhs(std::move(rhs))
-{
-}
-
-int32_t RiscVM::SubOperand::AsImmediate() const
-{
-    return Lhs->AsImmediate() - Rhs->AsImmediate();
+    if (Op == "+") return Lhs->AsImmediate() + Rhs->AsImmediate();
+    if (Op == "-") return Lhs->AsImmediate() - Rhs->AsImmediate();
+    if (Op == "*") return Lhs->AsImmediate() * Rhs->AsImmediate();
+    if (Op == "/") return Lhs->AsImmediate() / Rhs->AsImmediate();
+    if (Op == "%") return Lhs->AsImmediate() % Rhs->AsImmediate();
+    if (Op == "&") return Lhs->AsImmediate() & Rhs->AsImmediate();
+    if (Op == "|") return Lhs->AsImmediate() | Rhs->AsImmediate();
+    if (Op == "&&") return Lhs->AsImmediate() && Rhs->AsImmediate();
+    if (Op == "||") return Lhs->AsImmediate() || Rhs->AsImmediate();
+    if (Op == "^") return Lhs->AsImmediate() ^ Rhs->AsImmediate();
+    if (Op == "==") return Lhs->AsImmediate() == Rhs->AsImmediate();
+    if (Op == "!=") return Lhs->AsImmediate() != Rhs->AsImmediate();
+    if (Op == "<=") return Lhs->AsImmediate() <= Rhs->AsImmediate();
+    if (Op == ">=") return Lhs->AsImmediate() >= Rhs->AsImmediate();
+    if (Op == "<") return Lhs->AsImmediate() < Rhs->AsImmediate();
+    if (Op == ">") return Lhs->AsImmediate() > Rhs->AsImmediate();
+    if (Op == "<<") return Lhs->AsImmediate() << Rhs->AsImmediate();
+    if (Op == ">>") return Lhs->AsImmediate() >> Rhs->AsImmediate();
+    throw std::runtime_error("no such operator");
 }
 
 RiscVM::OperandPtr RiscVM::Imm(const int32_t imm)
@@ -99,7 +107,7 @@ RiscVM::OperandPtr RiscVM::Imm(const int32_t imm)
     return std::make_shared<ImmediateOperand>(imm);
 }
 
-RiscVM::OperandPtr RiscVM::Sym(Symbol& sym)
+RiscVM::OperandPtr RiscVM::Sym(SymbolBase* sym)
 {
     return std::make_shared<SymbolOperand>(sym);
 }
@@ -119,64 +127,92 @@ RiscVM::OperandPtr RiscVM::Bits(const OperandPtr& imm, uint32_t end, uint32_t be
     return std::make_shared<BitsOperand>(imm, beg, end, sign_ext);
 }
 
+RiscVM::OperandPtr RiscVM::Bin(const std::string& op, const OperandPtr& lhs, const OperandPtr& rhs)
+{
+    return std::make_shared<BinOperand>(op, lhs, rhs);
+}
+
 RiscVM::OperandPtr RiscVM::Add(const OperandPtr& lhs, const OperandPtr& rhs)
 {
-    return std::make_shared<AddOperand>(lhs, rhs);
+    return Bin("+", lhs, rhs);
 }
 
 RiscVM::OperandPtr RiscVM::Sub(const OperandPtr& lhs, const OperandPtr& rhs)
 {
-    return std::make_shared<SubOperand>(lhs, rhs);
+    return Bin("-", lhs, rhs);
 }
 
 RiscVM::OperandPtr RiscVM::Assembler::ParseOperand()
+{
+    return ParseBinary(ParsePrimary(), 0);
+}
+
+RiscVM::OperandPtr RiscVM::Assembler::ParsePrimary()
 {
     if (At(TokenType_Symbol))
     {
         const auto symbol = Skip().Value;
         if (IsRegister(symbol))
-        {
-            const auto reg = GetRegister(symbol);
-            return Reg(reg);
-        }
-        return Sub(Sym(m_SymbolTable[symbol]), Imm(static_cast<int32_t>(m_ActiveSection->Size())));
-    }
+            return Reg(GetRegister(symbol));
 
-    if (At(TokenType_RelativeSymbol))
-    {
-        const auto symbol = Skip().Immediate;
-        return Sub(
-            Sym(m_RelativeSymbolTable[reinterpret_cast<intptr_t>(m_RelativeBase) + symbol]),
-            Imm(static_cast<int32_t>(m_ActiveSection->Size())));
+        const auto pc = Imm(static_cast<int32_t>(m_ActiveSection->Size()));
+
+        if (symbol.front() == '.')
+            return Sub(Sym(&m_RelativeBase->SubSymbols[symbol]), pc);
+
+        auto& sym = m_SymbolTable[symbol];
+        if (reinterpret_cast<intptr_t>(sym.Base) == 1)
+            return Sym(&sym);
+
+        return Sub(Sym(&sym), pc);
     }
 
     if (At(TokenType_Immediate))
     {
-        const auto immediate = Skip().Immediate;
-        auto operand = Imm(static_cast<int32_t>(immediate));
+        auto imm = Imm(static_cast<int32_t>(Skip().Immediate));
         if (NextAt(TokenType_ParenOpen))
         {
             const auto base = ParseOperand();
             Expect(TokenType_ParenClose);
-            return Off(operand, base);
+            return Off(imm, base);
         }
-        return operand;
+        return imm;
     }
 
     if (At(TokenType_Char))
-    {
-        const auto c = Skip().Value;
-        return Imm(c.front());
-    }
+        return Imm(Skip().Value.front());
 
     if (NextAt(TokenType_Dot))
         return Imm(0);
 
-    if (NextAt(TokenType_Minus))
+    if (NextAt("-"))
+        return Imm(-static_cast<int32_t>(Skip().Immediate));
+
+    if (NextAt(TokenType_ParenOpen))
     {
-        const auto immediate = Skip().Immediate;
-        return Imm(-static_cast<int32_t>(immediate));
+        auto operand = ParseOperand();
+        Expect(TokenType_ParenClose);
+        return operand;
     }
 
     throw std::runtime_error("no such operand");
+}
+
+RiscVM::OperandPtr RiscVM::Assembler::ParseBinary(OperandPtr lhs, const int min_pre)
+{
+    static std::unordered_map<std::string, int> precedences
+    {
+        {"", 0},
+    };
+
+    while (At(TokenType_Operator) && precedences[m_Token.Value] >= min_pre)
+    {
+        const auto op = Skip().Value;
+        auto rhs = ParsePrimary();
+        while (At(TokenType_Operator) && precedences[m_Token.Value] > precedences[op])
+            rhs = ParseBinary(rhs, precedences[op] + 1);
+        lhs = Bin(op, lhs, rhs);
+    }
+
+    return lhs;
 }

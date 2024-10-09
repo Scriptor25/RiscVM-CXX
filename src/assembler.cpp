@@ -42,8 +42,6 @@ void RiscVM::Assembler::Parse()
 
     if (At(TokenType_Label))
         ParseLabel();
-    else if (At(TokenType_RelativeLabel))
-        ParseRelativeLabel();
 
     if (At(TokenType_Symbol))
     {
@@ -64,19 +62,20 @@ void RiscVM::Assembler::Parse()
 void RiscVM::Assembler::ParseLabel()
 {
     const auto label = Expect(TokenType_Label).Value;
-    auto& [base, offset, global] = m_SymbolTable[label];
-    base = m_ActiveSection;
-    offset = m_ActiveSection->Size();
+    if (label.front() == '.')
+    {
+        auto& symbol = m_RelativeBase->SubSymbols[label];
+        symbol.Base = m_ActiveSection;
+        symbol.Offset = m_ActiveSection->Size();
+
+        return;
+    }
+
+    auto& symbol = m_SymbolTable[label];
+    symbol.Base = m_ActiveSection;
+    symbol.Offset = m_ActiveSection->Size();
 
     m_RelativeBase = &m_SymbolTable[label];
-}
-
-void RiscVM::Assembler::ParseRelativeLabel()
-{
-    const auto label = Expect(TokenType_RelativeLabel).Immediate;
-    auto& [base, offset, global] = m_RelativeSymbolTable[reinterpret_cast<intptr_t>(m_RelativeBase) + label];
-    base = m_ActiveSection;
-    offset = m_ActiveSection->Size();
 }
 
 int RiscVM::Assembler::Get() const
@@ -102,9 +101,24 @@ bool RiscVM::Assembler::At(const TokenType type) const
     return type == m_Token.Type;
 }
 
+bool RiscVM::Assembler::At(const std::string& value) const
+{
+    return value == m_Token.Value;
+}
+
 bool RiscVM::Assembler::NextAt(const TokenType type)
 {
     if (At(type))
+    {
+        Next();
+        return true;
+    }
+    return false;
+}
+
+bool RiscVM::Assembler::NextAt(const std::string& value)
+{
+    if (At(value))
     {
         Next();
         return true;

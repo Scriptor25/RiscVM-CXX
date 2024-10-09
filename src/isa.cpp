@@ -68,9 +68,9 @@ void RiscVM::Format::S::Dump() const
     printf(
         "%-7s %s,%d(%s)",
         InstructionName(Data),
-        RegisterName(Rs2),
+        RegisterName(Rs1),
         Immediate(),
-        RegisterName(Rs1));
+        RegisterName(Rs2));
 }
 
 int32_t RiscVM::Format::B::Immediate() const

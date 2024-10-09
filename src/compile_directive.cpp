@@ -11,6 +11,15 @@ void RiscVM::Assembler::ParseCompileDirective()
         m_ActiveSection = &m_Sections[section];
         return;
     }
+    if (directive == ".set")
+    {
+        const auto label = Expect(TokenType_Symbol).Value;
+        const auto imm = ParseOperand()->AsImmediate();
+        auto& symbol = m_SymbolTable[label];
+        symbol.Base = reinterpret_cast<Section*>(1);
+        symbol.Offset = imm;
+        return;
+    }
     if (directive == ".globl")
     {
         const auto label = Expect(TokenType_Symbol).Value;
@@ -19,13 +28,13 @@ void RiscVM::Assembler::ParseCompileDirective()
     }
     if (directive == ".skip")
     {
-        const auto n = Expect(TokenType_Immediate).Immediate;
+        const auto n = ParseOperand()->AsImmediate();
         m_ActiveSection->Skip(n);
         return;
     }
     if (directive == ".align")
     {
-        const auto n = Expect(TokenType_Immediate).Immediate;
+        const auto n = ParseOperand()->AsImmediate();
         if (const auto rem = m_ActiveSection->Size() % n)
             m_ActiveSection->Skip(n - rem);
         return;

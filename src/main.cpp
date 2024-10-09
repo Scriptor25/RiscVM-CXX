@@ -87,11 +87,13 @@ static void dump(const char* binary, const size_t size)
 
         printf("\n");
     }
+
+    fflush(stdout);
 }
 
 static int exec(const char* pgm, const size_t size)
 {
-    // dump(pgm, size);
+    dump(pgm, size);
 
     RiscVM::VM vm;
     vm.Load(pgm, size);

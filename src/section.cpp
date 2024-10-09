@@ -13,6 +13,12 @@ void RiscVM::Section::EmplaceBack(const uint32_t offset, const RV32IM rv, const 
     Skip(4);
 }
 
+void RiscVM::Section::EmplaceBack(const RV32IM rv, const std::vector<OperandPtr>& operands)
+{
+    Instructions.emplace_back(Data.size(), rv, operands);
+    Skip(4);
+}
+
 void RiscVM::Section::Skip(const size_t n)
 {
     Data.resize(Data.size() + n);

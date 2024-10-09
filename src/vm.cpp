@@ -98,7 +98,6 @@ void RiscVM::VM::Exec(const uint32_t data)
     case RV32IM_ECALL: return ECALL();
     case RV32IM_EBREAK: return EBREAK();
     case RV32IM_FENCE: return FENCE(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_FENCEI: return FENCEI(Rd(data), Rs1(data), UImmediateI(data));
     case RV32IM_CSRRW: return CSRRW(Rd(data), Rs1(data), UImmediateI(data));
     case RV32IM_CSRRS: return CSRRS(Rd(data), Rs1(data), UImmediateI(data));
     case RV32IM_CSRRC: return CSRRC(Rd(data), Rs1(data), UImmediateI(data));
@@ -333,6 +332,7 @@ void RiscVM::VM::AND(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
 
 void RiscVM::VM::FENCE(uint32_t rd, uint32_t rs1, uint32_t fm_pred_succ)
 {
+    std::cerr << "not yet implemented: fence" << std::endl;
 }
 
 void RiscVM::VM::ECALL()
@@ -377,34 +377,37 @@ void RiscVM::VM::ECALL()
 
 void RiscVM::VM::EBREAK()
 {
-}
-
-void RiscVM::VM::FENCEI(uint32_t rd, uint32_t rs1, uint32_t imm)
-{
+    std::cerr << "not yet implemented: ebreak" << std::endl;
 }
 
 void RiscVM::VM::CSRRW(uint32_t rd, uint32_t rs1, uint32_t csr)
 {
+    std::cerr << "not yet implemented: csrrw" << std::endl;
 }
 
 void RiscVM::VM::CSRRS(uint32_t rd, uint32_t rs1, uint32_t csr)
 {
+    std::cerr << "not yet implemented: csrrs" << std::endl;
 }
 
 void RiscVM::VM::CSRRC(uint32_t rd, uint32_t rs1, uint32_t csr)
 {
+    std::cerr << "not yet implemented: csrrc" << std::endl;
 }
 
 void RiscVM::VM::CSRRWI(uint32_t rd, uint32_t u_imm, uint32_t csr)
 {
+    std::cerr << "not yet implemented: csrrwi" << std::endl;
 }
 
 void RiscVM::VM::CSRRSI(uint32_t rd, uint32_t u_imm, uint32_t csr)
 {
+    std::cerr << "not yet implemented: csrrsi" << std::endl;
 }
 
 void RiscVM::VM::CSRRCI(uint32_t rd, uint32_t u_imm, uint32_t csr)
 {
+    std::cerr << "not yet implemented: csrrci" << std::endl;
 }
 
 void RiscVM::VM::MUL(const uint32_t rd, const uint32_t rs1, const uint32_t rs2)
