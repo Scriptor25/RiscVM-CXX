@@ -88,9 +88,9 @@ print_field:
     call putc
 
     addi s0,zero,0
-.0: ; for each column in row
+.loop0:
     addi t0,zero,WIDTH
-    bge  s0,t0,.1
+    bge  s0,t0,.end0
 
     addi a0,zero,0x20
     call putc
@@ -98,8 +98,8 @@ print_field:
     call putc
 
     addi s0,s0,1
-    j    .0
-.1: ; end for each column
+    j    .loop0
+.end0:
 
     ; new line
     addi a0,zero,0xa
@@ -111,26 +111,26 @@ print_field:
     call putc
 
     addi s0,zero,0
-.2: ; for each column in row
+.loop1:
     addi t0,zero,WIDTH
-    bge  s0,t0,.3
+    bge  s0,t0,.end1
 
     addi a0,zero,'-'
     call putc
     call putc
 
     addi s0,s0,1
-    j    .2
-.3: ; end for each column
+    j    .loop1
+.end1:
 
     ; new line
     addi a0,zero,0xa
     call putc
 
     addi s0,zero,0
-.4: ; for each row in field
+.loop2:
     addi t0,zero,HEIGHT
-    bge  s0,t0,.7
+    bge  s0,t0,.end2
 
     addi a0,s0,0x30
     call putc
@@ -140,9 +140,9 @@ print_field:
     call putc
 
     addi s1,zero,0
-.5: ; for each column in row
+.loop3:
     addi t0,zero,WIDTH
-    bge  s1,t0,.6
+    bge  s1,t0,.end3
 
     addi a0,zero,0x20
     call putc
@@ -152,15 +152,16 @@ print_field:
     call print_cell
 
     addi s1,s1,1
-    j    .5
-.6: ; end for each column
+    j    .loop3
+.end3:
+
     ; new line
     addi a0,zero,0xa
     call putc
 
     addi s0,s0,1
-    j    .4
-.7: ; end for each row
+    j    .loop2
+.end2:
 
     popw s1,s0,ra
     ret
@@ -208,10 +209,10 @@ print_cell:
     mv   t0,a0
 
     ; display count if > 0
-    beq  t0,zero,.0
+    beq  t0,zero,.eq_zero
     addi t0,t0,0x30
     j    .end
-.0:
+.eq_zero:
     addi t0,zero,'_'
     j    .end
 .mine:
@@ -265,6 +266,9 @@ user_input:
     call  is_flag
     bne   a0,zero,.cl_flg
     mv    a0,s3
+    call  is_open
+    bne   a0,zero,.end
+    mv    a0,s3
     call  set_flag
     mv    s3,a0
     j     .end
@@ -304,8 +308,9 @@ check_state:
     pushw ra,s0,s1
 
     addi s0,zero,0
-.0: addi t0,zero,AREA
-    bge  s0,t0,.2
+.loop:
+    addi t0,zero,AREA
+    bge  s0,t0,.end
 
     la   t0,field   ; t0 = &field
     add  t0,t0,s0   ; t0 += s0
@@ -313,17 +318,19 @@ check_state:
 
     mv   a0,s1
     call is_mine
-    beq  a0,zero,.1
+    beq  a0,zero,.continue
     mv   a0,s1
     call is_open
-    beq  a0,zero,.1
+    beq  a0,zero,.continue
 
     popw s1,s0,ra
     ret
 
-.1: addi s0,s0,1
-    j    .0
-.2: addi a0,zero,0
+.continue:
+    addi s0,s0,1
+    j    .loop
+.end:
+    addi a0,zero,0
     popw s1,s0,ra
     ret
 
@@ -340,13 +347,15 @@ count_surrounding:
 
     ; for each in [-1;1]
     addi  s2,zero,-1
-.0: addi  t0,zero,2
-    bge   s2,t0,.3
+.loop_x:
+    addi  t0,zero,2
+    bge   s2,t0,.end_x
 
     ; for each in [-1;1]
     addi  s3,zero,-1
-.1: addi  t0,zero,2
-    bge   s3,t0,.2
+.loop_y:
+    addi  t0,zero,2
+    bge   s3,t0,.end_y
 
     add   a0,s0,s2
     add   a1,s1,s3
@@ -355,11 +364,11 @@ count_surrounding:
     add   s4,s4,a0
 
     addi  s3,s3,1
-    j     .1
-.2:
+    j     .loop_y
+.end_y:
     addi  s2,s2,1
-    j     .0
-.3:
+    j     .loop_x
+.end_x:
     ; subtract 1 if center cell is a mine
     mv    a0,s0
     mv    a1,s1
