@@ -56,10 +56,10 @@ bool RiscVM::Assembler::ParsePseudoCall(
         return true;
     }
 
-    // push: push rs1,rs2,...,rsN
+    // push: pushw rs1,rs2,...,rsN
     // addi sp,sp,-4*N
-    // sw   rsI,4*(N-I)(sp)
-    if (name == "push")
+    // sw   rsI,4*(N-I-1)(sp)
+    if (name == "pushw")
     {
         const auto regs = operands;
         const auto n = static_cast<int32_t>(regs.size());
@@ -76,17 +76,71 @@ bool RiscVM::Assembler::ParsePseudoCall(
 
             operands.clear();
             operands.push_back(rs);
-            operands.push_back(Off(Imm(4 * (n - i)), Reg(sp)));
+            operands.push_back(Off(Imm(4 * (n - i - 1)), Reg(sp)));
             m_ActiveSection->EmplaceBack(RV32IM_SW, operands);
         }
 
         return true;
     }
 
-    // pop: pop rd1,rd2,...,rdN
+    // push: pushh rs1,rs2,...,rsN
+    // addi sp,sp,-2*N
+    // sh   rsI,2*(N-I-1)(sp)
+    if (name == "pushh")
+    {
+        const auto regs = operands;
+        const auto n = static_cast<int32_t>(regs.size());
+
+        operands.clear();
+        operands.push_back(Reg(sp));
+        operands.push_back(Reg(sp));
+        operands.push_back(Imm(-2 * n));
+        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+
+        for (int32_t i = 0; i < regs.size(); ++i)
+        {
+            const auto& rs = regs[i];
+
+            operands.clear();
+            operands.push_back(rs);
+            operands.push_back(Off(Imm(2 * (n - i - 1)), Reg(sp)));
+            m_ActiveSection->EmplaceBack(RV32IM_SH, operands);
+        }
+
+        return true;
+    }
+
+    // push: pushb rs1,rs2,...,rsN
+    // addi sp,sp,-N
+    // sb   rsI,N-I-1(sp)
+    if (name == "pushb")
+    {
+        const auto regs = operands;
+        const auto n = static_cast<int32_t>(regs.size());
+
+        operands.clear();
+        operands.push_back(Reg(sp));
+        operands.push_back(Reg(sp));
+        operands.push_back(Imm(-n));
+        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+
+        for (int32_t i = 0; i < regs.size(); ++i)
+        {
+            const auto& rs = regs[i];
+
+            operands.clear();
+            operands.push_back(rs);
+            operands.push_back(Off(Imm(n - i - 1), Reg(sp)));
+            m_ActiveSection->EmplaceBack(RV32IM_SB, operands);
+        }
+
+        return true;
+    }
+
+    // pop: popw rd1,rd2,...,rdN
     // addi sp,sp,4*N
-    // lw   rdI,-4*(N-I-1)(sp)
-    if (name == "pop")
+    // lw   rdI,-4*(N-I)(sp)
+    if (name == "popw")
     {
         const auto regs = operands;
         const auto n = static_cast<int32_t>(regs.size());
@@ -103,8 +157,116 @@ bool RiscVM::Assembler::ParsePseudoCall(
 
             operands.clear();
             operands.push_back(rd);
-            operands.push_back(Off(Imm(-4 * (n - i - 1)), Reg(sp)));
+            operands.push_back(Off(Imm(-4 * (n - i)), Reg(sp)));
             m_ActiveSection->EmplaceBack(RV32IM_LW, operands);
+        }
+
+        return true;
+    }
+
+    // pop: poph rd1,rd2,...,rdN
+    // addi sp,sp,2*N
+    // lh   rdI,-2*(N-I)(sp)
+    if (name == "poph")
+    {
+        const auto regs = operands;
+        const auto n = static_cast<int32_t>(regs.size());
+
+        operands.clear();
+        operands.push_back(Reg(sp));
+        operands.push_back(Reg(sp));
+        operands.push_back(Imm(2 * n));
+        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+
+        for (int32_t i = 0; i < regs.size(); ++i)
+        {
+            const auto& rd = regs[i];
+
+            operands.clear();
+            operands.push_back(rd);
+            operands.push_back(Off(Imm(-2 * (n - i)), Reg(sp)));
+            m_ActiveSection->EmplaceBack(RV32IM_LH, operands);
+        }
+
+        return true;
+    }
+
+    // pop: pophu rd1,rd2,...,rdN
+    // addi sp,sp,2*N
+    // lhu  rdI,-2*(N-I)(sp)
+    if (name == "pophu")
+    {
+        const auto regs = operands;
+        const auto n = static_cast<int32_t>(regs.size());
+
+        operands.clear();
+        operands.push_back(Reg(sp));
+        operands.push_back(Reg(sp));
+        operands.push_back(Imm(2 * n));
+        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+
+        for (int32_t i = 0; i < regs.size(); ++i)
+        {
+            const auto& rd = regs[i];
+
+            operands.clear();
+            operands.push_back(rd);
+            operands.push_back(Off(Imm(-2 * (n - i)), Reg(sp)));
+            m_ActiveSection->EmplaceBack(RV32IM_LHU, operands);
+        }
+
+        return true;
+    }
+
+    // pop: popb rd1,rd2,...,rdN
+    // addi sp,sp,N
+    // lb   rdI,-(N-I)(sp)
+    if (name == "popb")
+    {
+        const auto regs = operands;
+        const auto n = static_cast<int32_t>(regs.size());
+
+        operands.clear();
+        operands.push_back(Reg(sp));
+        operands.push_back(Reg(sp));
+        operands.push_back(Imm(n));
+        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+
+        for (int32_t i = 0; i < regs.size(); ++i)
+        {
+            const auto& rd = regs[i];
+
+            operands.clear();
+            operands.push_back(rd);
+            operands.push_back(Off(Imm(-(n - i)), Reg(sp)));
+            m_ActiveSection->EmplaceBack(RV32IM_LB, operands);
+        }
+
+        return true;
+    }
+
+    // pop: popbu rd1,rd2,...,rdN
+    // addi sp,sp,N
+    // lbu  rdI,-(N-I)(sp)
+    if (name == "popbu")
+    {
+        const auto regs = operands;
+        const auto n = static_cast<int32_t>(regs.size());
+
+        operands.clear();
+        operands.push_back(Reg(sp));
+        operands.push_back(Reg(sp));
+        operands.push_back(Imm(n));
+        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+
+        for (int32_t i = 0; i < regs.size(); ++i)
+        {
+            const auto& rd = regs[i];
+
+            operands.clear();
+            operands.push_back(rd);
+            operands.push_back(Off(Imm(-(n - i)), Reg(sp)));
+            m_ActiveSection->EmplaceBack(RV32IM_LBU, operands);
         }
 
         return true;

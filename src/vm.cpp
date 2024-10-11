@@ -339,26 +339,26 @@ void RiscVM::VM::ECALL()
 {
     switch (R(a7))
     {
-    case 0: // putchar
-        putchar(R(a0));
+    case 0: // putc
+        fputc(R(a0), stdout);
         fflush(stdout);
         break;
     case 1: // puts
-        puts(m_Memory + R(a0));
+        fputs(m_Memory + R(a0), stdout);
         fflush(stdout);
         break;
     case 2: // printf
         vprintf(m_Memory + R(a0), m_Memory + R(a1));
         fflush(stdout);
         break;
-    case 3: // getchar
-        R(a0) = getchar();
+    case 3: // getc
+        R(a0) = fgetc(stdin);
         break;
     case 4: // gets
         fgets(m_Memory + R(a0), R(a1), stdin);
         break;
     case 5: // scanf
-        scanf(m_Memory + R(a0), m_Memory + R(a1));
+        vfscanf(stdin, m_Memory + R(a0), m_Memory + R(a1));
         break;
     case 120: // random
         {

@@ -1,9 +1,10 @@
 .set WIDTH  10
 .set HEIGHT 10
 .set MINES  10
+.set AREA   WIDTH * HEIGHT
 
 .section .bss
-field: .skip (WIDTH * HEIGHT)
+field: .skip AREA
 
 stack_top:
 .skip 0x1000
@@ -14,8 +15,14 @@ _start:
     ; setup stack
     la   sp,stack_bottom
 
+    ; place mines randomly
     call place_mines
     call print_field
+
+.0: call user_input
+    call print_field
+    call check_state
+    beq  a0,zero,.0
 
     addi a0,zero,0
     call exit
@@ -24,45 +31,71 @@ _start:
 ; void place_mines()
 ;
 place_mines:
-    push ra
+    pushw ra,s0,s1,s2,s3
 
-    addi t0,zero,0
+    addi s0,zero,0
 .0:
-    addi t1,zero,MINES
-    bge  t0,t1,.1
+    addi t0,zero,MINES
+    bge  s0,t0,.1
 
-    ; load random cell
+    ; get random x (s1) and y (s2) coords
+    addi a0,zero,0
+    addi a1,zero,WIDTH
+    call random
+    mv   s1,a0
+    addi a0,zero,0
+    addi a1,zero,HEIGHT
+    call random
+    mv   s2,a0
+
+    ; load the cell (s3)
+    mv   a0,s1
+    mv   a1,s2
+    call load_cell
+    mv   s3,a0
+
     ; if cell already is a mine, continue
-    ; flip mine bit of cell
-    ; store cell
+    mv   a0,s3
+    call is_mine
+    bne  a0,zero,.0
 
-    addi t0,t0,1
+    ; flip mine bit of cell
+    mv   a0,s3
+    call set_mine
+    mv   a2,a0
+
+    ; store cell
+    mv   a0,s1
+    mv   a1,s2
+    call store_cell
+
+    addi s0,s0,1
     j    .0
 .1:
-    pop ra
+    popw s3,s2,s1,s0,ra
     ret
 
 ;
 ; void print_field()
 ;
 print_field:
-    push ra,s0,s1
+    pushw ra,s0,s1
 
-    ; first line: <column index 0-F>...
     addi a0,zero,0x20
-    call putchar
-    addi a0,zero,0x20
-    call putchar
+    call putc
+    call putc
+    addi a0,zero,'|'
+    call putc
 
     addi s0,zero,0
 .0: ; for each column in row
     addi t0,zero,WIDTH
     bge  s0,t0,.1
 
-    addi a0,s0,0x30
-    call putchar
     addi a0,zero,0x20
-    call putchar
+    call putc
+    addi a0,s0,0x30
+    call putc
 
     addi s0,s0,1
     j    .0
@@ -70,144 +103,398 @@ print_field:
 
     ; new line
     addi a0,zero,0xa
-    call putchar
+    call putc
 
-    ; each line: <row index 0-F> <cell at (column|row)>...
+    addi a0,zero,'-'
+    call putc
+    call putc
+    call putc
+
     addi s0,zero,0
-.2: ; for each row in field
+.2: ; for each column in row
+    addi t0,zero,WIDTH
+    bge  s0,t0,.3
+
+    addi a0,zero,'-'
+    call putc
+    call putc
+
+    addi s0,s0,1
+    j    .2
+.3: ; end for each column
+
+    ; new line
+    addi a0,zero,0xa
+    call putc
+
+    addi s0,zero,0
+.4: ; for each row in field
     addi t0,zero,HEIGHT
-    bge  s0,t0,.5
+    bge  s0,t0,.7
 
     addi a0,s0,0x30
-    call putchar
+    call putc
     addi a0,zero,0x20
-    call putchar
+    call putc
+    addi a0,zero,'|'
+    call putc
 
     addi s1,zero,0
-.3: ; for each column in row
+.5: ; for each column in row
     addi t0,zero,WIDTH
-    bge  s1,t0,.4
+    bge  s1,t0,.6
+
+    addi a0,zero,0x20
+    call putc
 
     mv   a0,s1
     mv   a1,s0
     call print_cell
 
     addi s1,s1,1
-    j    .3
-.4: ; end for each column
+    j    .5
+.6: ; end for each column
     ; new line
     addi a0,zero,0xa
-    call putchar
+    call putc
 
     addi s0,s0,1
-    j    .2
-.5: ; end for each row
+    j    .4
+.7: ; end for each row
 
-    pop s1,s0,ra
+    popw s1,s0,ra
     ret
 
 ;
 ; void print_cell(int x, int y)
 ;
 print_cell:
-    push ra
+    pushw ra,s0,s1,s2
+
+    mv   s0,a0
+    mv   s1,a1
 
     call load_cell
-    mv   t0,a0
+    mv   s2,a0
 
-    ; bit 0 -> is mine [t1]
-    ; bit 1 -> is open [t2]
-    ; bit 2 -> is flag [t3]
-    ; if is flag     -> 'F'
+    ; bit 0 -> is mine
+    ; bit 1 -> is open
+    ; bit 2 -> is flag
+    ; if is flag     -> '+'
     ; if not is open -> '#'
     ; if is open
     ;  if is mine    -> '*'
     ;  else          -> '_'
-    andi t1,t0,0b001
-    andi t2,t0,0b010
-    srai t2,t2,1
-    andi t3,t0,0b100
-    srai t3,t3,2
 
-    ; store char in [t0]
-    bne  t3,zero,.0
-    bne  t2,zero,.1
+    ; store char in t0
+    call is_flag
+    bne  a0,zero,.flg
+    mv   a0,s2
+    call is_open
+    bne  a0,zero,.opn
     addi t0,zero,'#'
-    j    .3
-.0: addi t0,zero,'F'
-    j    .3
-.1: bne  t1,zero,.2
-    addi t0,zero,'_'
-    j    .3
-.2: addi t0,zero,'*'
-    j    .3
-.3: ; print char from [t0]
-    mv   a0,t0
-    call putchar
-    addi a0,zero,0x20
-    call putchar
+    j    .end
+.flg:
+    addi t0,zero,'+'
+    j    .end
+.opn:
+    mv   a0,s2
+    call is_mine
+    bne  a0,zero,.mine
 
-    pop ra
+    mv   a0,s0
+    mv   a1,s1
+    call count_surrounding
+    mv   t0,a0
+
+    ; display count if > 0
+    beq  t0,zero,.0
+    addi t0,t0,0x30
+    j    .end
+.0:
+    addi t0,zero,'_'
+    j    .end
+.mine:
+    addi t0,zero,'*'
+    j    .end
+.end:
+    ; print char from t0
+    mv   a0,t0
+    call putc
+
+    popw s2,s1,s0,ra
+    ret
+
+;
+; void user_input()
+;
+user_input:
+    pushw ra,s0,s1,s2,s3
+
+    call  getc ; command
+    mv    s0,a0
+    call  getc ; row
+    addi  s2,a0,-0x30
+    call  getc ; column
+    addi  s1,a0,-0x30
+    call  getc ; new line
+
+    ; load cell
+    mv    a0,s1
+    mv    a1,s2
+    call  load_cell
+    mv    s3,a0
+
+    ; s0 -> command
+    ; s1 -> column
+    ; s2 -> row
+    ; s3 -> cell
+
+    addi  t0,zero,'f'
+    beq   s0,t0,.flag
+    addi  t0,zero,'c'
+    beq   s0,t0,.clear
+    j     .end
+
+.flag:
+    ; (un)flag cell at row, column
+    ; if flag is set
+    ;  then clear flag
+    ;  else set flag
+    mv    a0,s3
+    call  is_flag
+    bne   a0,zero,.cl_flg
+    mv    a0,s3
+    call  set_flag
+    mv    s3,a0
+    j     .end
+
+.cl_flg:
+    mv    a0,s3
+    call  clear_flag
+    mv    s3,a0
+    j     .end
+
+.clear:
+    ; open cell at row, column
+    mv    a0,s3
+    call  is_flag
+    bne   a0,zero,.end
+    mv    a0,s3
+    call  set_open
+    mv    s3,a0
+
+.end:
+    mv    a0,s1
+    mv    a1,s2
+    mv    a2,s3
+    call  store_cell
+
+    popw  s3,s2,s1,s0,ra
+    ret
+
+;
+; int check_state()
+;
+check_state:
+    ; iterate over all cells
+    ;  if the current cell is a mine and is open
+    ;   then return non-zero
+    ; return zero
+    pushw ra,s0,s1
+
+    addi s0,zero,0
+.0: addi t0,zero,AREA
+    bge  s0,t0,.2
+
+    la   t0,field   ; t0 = &field
+    add  t0,t0,s0   ; t0 += s0
+    lb   s1,0(t0)   ; s1 = *t0
+
+    mv   a0,s1
+    call is_mine
+    beq  a0,zero,.1
+    mv   a0,s1
+    call is_open
+    beq  a0,zero,.1
+
+    popw s1,s0,ra
+    ret
+
+.1: addi s0,s0,1
+    j    .0
+.2: addi a0,zero,0
+    popw s1,s0,ra
+    ret
+
+;
+; int count_surrounding(int x, int y)
+;
+count_surrounding:
+    pushw ra,s0,s1,s2,s3,s4
+
+    mv    s0,a0
+    mv    s1,a1
+
+    addi  s4,zero,0
+
+    ; for each in [-1;1]
+    addi  s2,zero,-1
+.0: addi  t0,zero,2
+    bge   s2,t0,.3
+
+    ; for each in [-1;1]
+    addi  s3,zero,-1
+.1: addi  t0,zero,2
+    bge   s3,t0,.2
+
+    add   a0,s0,s2
+    add   a1,s1,s3
+    call  load_cell
+    call  is_mine
+    add   s4,s4,a0
+
+    addi  s3,s3,1
+    j     .1
+.2:
+    addi  s2,s2,1
+    j     .0
+.3:
+    ; subtract 1 if center cell is a mine
+    mv    a0,s0
+    mv    a1,s1
+    call  load_cell
+    call  is_mine
+    sub   a0,s4,a0
+
+    popw  s4,s3,s2,s1,s0,ra
     ret
 
 ;
 ; int load_cell(int x, int y)
 ;
 load_cell:
-    addi t0,zero,WIDTH
-    mul  t0,t0,a1
-    add  t0,t0,a0
-    la   t1,field
-    add  t0,t0,t1
-    lb   a0,0(t0)
+    blt  a0,zero,.out
+    blt  a1,zero,.out
+    addi t0,zero,WIDTH  ; t0 = WIDTH
+    addi t1,zero,HEIGHT ; t1 = HEIGHT
+    bge  a0,t0,.out
+    bge  a1,t1,.out
+    mul  t0,t0,a1       ; t0 *= a1
+    add  t0,t0,a0       ; t0 += a0
+    la   t1,field       ; t1 = &field
+    add  t0,t0,t1       ; t0 += t1
+    lb   a0,0(t0)       ; a0 = *t0
+    j    .end
+.out:
+    addi a0,zero,0
+.end:
     ret
 
 ;
 ; void store_cell(int x, int y, int c)
 ;
 store_cell:
-    addi t0,zero,WIDTH
-    mul  t0,t0,a1
-    add  t0,t0,a0
-    la   t1,field
-    add  t0,t0,t1
-    sb   a2,0(t0)
-    ret
-
-;
-; int get_char(int c)
-;
-get_char:
+    blt  a0,zero,.end
+    blt  a1,zero,.end
+    addi t0,zero,WIDTH  ; t0 = WIDTH
+    addi t1,zero,HEIGHT ; t1 = HEIGHT
+    bge  a0,t0,.end
+    bge  a1,t1,.end
+    mul  t0,t0,a1       ; t0 *= a1
+    add  t0,t0,a0       ; t0 += a0
+    la   t1,field       ; t1 = &field
+    add  t0,t0,t1       ; t0 += t1
+    sb   a2,0(t0)       ; *t0 = a2
+.end:
     ret
 
 ;
 ; int is_mine(int c)
 ;
 is_mine:
-    andi a0,a0,0b001
+    andi a0,a0,0b001    ; a0 &= 0b001
     ret
 
 ;
 ; int is_open(int c)
 ;
 is_open:
-    andi a0,a0,0b010
-    srai a0,a0,1
+    andi a0,a0,0b010    ; a0 &= 0b010
+    srai a0,a0,1        ; a0 >>= 1
     ret
 
 ;
 ; int is_flag(int c)
 ;
 is_flag:
-    andi a0,a0,0b100
-    srai a0,a0,2
+    andi a0,a0,0b100    ; a0 &= 0b100
+    srai a0,a0,2        ; a0 >>= 2
     ret
 
 ;
-; void putchar(int c)
+; int set_mine(int c)
 ;
-putchar:
+set_mine:
+    ori  a0,a0,0b001
+    ret
+
+;
+; int clear_mine(int c)
+;
+clear_mine:
+    andi a0,a0,0b110
+    ret
+
+;
+; int set_open(int c)
+;
+set_open:
+    ori  a0,a0,0b010
+    ret
+
+;
+; int clear_open(int c)
+;
+clear_open:
+    andi a0,a0,0b101
+    ret
+
+;
+; int set_flag(int c)
+;
+set_flag:
+    ori  a0,a0,0b100
+    ret
+
+;
+; int clear_flag(int c)
+;
+clear_flag:
+    andi a0,a0,0b011
+    ret
+
+;
+; void putc(int c)
+;
+putc:
     addi a7,zero,0
+    ecall
+    ret
+
+;
+; void printf(char* format, ...)
+;
+printf:
+    addi a7,zero,2
+    ecall
+    ret
+
+;
+; int getc()
+;
+getc:
+    addi a7,zero,3
     ecall
     ret
 

@@ -32,7 +32,8 @@ RiscVM::SymbolOperand::SymbolOperand(SymbolBase* sym)
 
 int32_t RiscVM::SymbolOperand::AsImmediate() const
 {
-    return static_cast<int32_t>((reinterpret_cast<intptr_t>(Sym->Base) > 1 ? Sym->Base->Offset : 0) + Sym->Offset);
+    if (!Sym->Base) throw std::runtime_error("no such symbol");
+    return static_cast<int32_t>((reinterpret_cast<intptr_t>(Sym->Base) != 1 ? Sym->Base->Offset : 0) + Sym->Offset);
 }
 
 RiscVM::RegisterOperand::RegisterOperand(const Register reg)
