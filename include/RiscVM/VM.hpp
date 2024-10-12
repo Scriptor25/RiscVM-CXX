@@ -22,11 +22,24 @@ namespace RiscVM
         void Reset();
         void Load(const char* pgm, size_t len);
         bool Cycle();
+
+        MemBuffer& Memory();
+        [[nodiscard]] size_t MemorySize() const;
+
+        template <typename T>
+        T* Append(const size_t size)
+        {
+            const auto old_size = m_MemorySize;
+            m_MemorySize += size;
+            m_Memory.PTR = realloc(m_Memory.PTR, m_MemorySize);
+
+            return reinterpret_cast<T*>(m_Memory.PTR + old_size);
+        }
+
         [[nodiscard]] bool Ok() const;
+        [[nodiscard]] int32_t Status() const;
 
         int32_t& R(uint32_t);
-
-        [[nodiscard]] int32_t Status() const;
 
         void Exec(uint32_t data);
 

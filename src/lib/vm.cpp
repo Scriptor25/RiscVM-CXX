@@ -37,9 +37,24 @@ bool RiscVM::VM::Cycle()
     return m_Ok = false;
 }
 
+RiscVM::MemBuffer& RiscVM::VM::Memory()
+{
+    return m_Memory;
+}
+
+size_t RiscVM::VM::MemorySize() const
+{
+    return m_MemorySize;
+}
+
 bool RiscVM::VM::Ok() const
 {
     return m_Ok;
+}
+
+int32_t RiscVM::VM::Status() const
+{
+    return m_Status;
 }
 
 int32_t& RiscVM::VM::R(const uint32_t r)
@@ -47,11 +62,6 @@ int32_t& RiscVM::VM::R(const uint32_t r)
     if (r == 0)
         return m_Registers[0] = 0;
     return m_Registers[r];
-}
-
-int32_t RiscVM::VM::Status() const
-{
-    return m_Status;
 }
 
 void RiscVM::VM::Exec(const uint32_t data)
