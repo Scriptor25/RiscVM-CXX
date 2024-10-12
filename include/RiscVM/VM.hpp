@@ -16,7 +16,7 @@ namespace RiscVM
         [[nodiscard]] char* Memory() const;
         [[nodiscard]] size_t MemorySize() const;
 
-        [[nodiscard]] bool Ok() const;
+        bool& Ok();
         [[nodiscard]] int32_t Status() const;
 
         int32_t& R(uint32_t);

@@ -56,7 +56,7 @@ size_t RiscVM::VM::MemorySize() const
     return m_MemorySize;
 }
 
-bool RiscVM::VM::Ok() const
+bool& RiscVM::VM::Ok()
 {
     return m_Ok;
 }
