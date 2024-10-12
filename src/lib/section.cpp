@@ -9,9 +9,10 @@ void RiscVM::Section::PushBack(const Instruction& instruction)
 
 void RiscVM::Section::PushBack(const int32_t i)
 {
-    auto p = reinterpret_cast<int32_t*>(&Data.back());
-    Skip(4);
-    *p = i;
+    Data.push_back(static_cast<char>(i & 0xff));
+    Data.push_back(static_cast<char>(i >> 8 & 0xff));
+    Data.push_back(static_cast<char>(i >> 16 & 0xff));
+    Data.push_back(static_cast<char>(i >> 24 & 0xff));
 }
 
 void RiscVM::Section::EmplaceBack(const uint32_t offset, const RV32IM rv, const std::vector<OperandPtr>& operands)
