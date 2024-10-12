@@ -9,6 +9,7 @@ namespace RiscVM
     struct Section
     {
         void PushBack(const Instruction&);
+        void PushBack(int32_t);
         void EmplaceBack(uint32_t offset, RV32IM rv, const std::vector<OperandPtr>& operands);
         void EmplaceBack(RV32IM rv, const std::vector<OperandPtr>& operands);
         void Skip(size_t n);

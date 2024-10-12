@@ -7,6 +7,13 @@ void RiscVM::Section::PushBack(const Instruction& instruction)
     Skip(4);
 }
 
+void RiscVM::Section::PushBack(const int32_t i)
+{
+    auto p = reinterpret_cast<int32_t*>(&Data.back());
+    Skip(4);
+    *p = i;
+}
+
 void RiscVM::Section::EmplaceBack(const uint32_t offset, const RV32IM rv, const std::vector<OperandPtr>& operands)
 {
     Instructions.emplace_back(offset, rv, operands);

@@ -51,6 +51,12 @@ void RiscVM::Assembler::ParseCompileDirective()
         while (NextAt(TokenType_Comma));
         return;
     }
+    if (directive == ".word")
+    {
+        do m_ActiveSection->PushBack(ParseOperand()->AsImmediate());
+        while (NextAt(TokenType_Comma));
+        return;
+    }
 
     throw std::runtime_error("no such compile directive");
 }
