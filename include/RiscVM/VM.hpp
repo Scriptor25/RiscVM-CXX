@@ -7,14 +7,14 @@ namespace RiscVM
     class VM
     {
     public:
-        int32_t& R(uint32_t);
-
         void Reset();
         void Load(const char* pgm, size_t len);
         bool Cycle();
         [[nodiscard]] bool Ok() const;
 
-        char* Memory();
+        int32_t& R(uint32_t);
+
+        std::vector<char>& Memory();
         [[nodiscard]] int32_t Status() const;
 
         void Exec(uint32_t data);
@@ -87,10 +87,12 @@ namespace RiscVM
 
     private:
         int32_t m_Registers[32]{};
-        int32_t m_PC{};
-        char m_Memory[0x8000]{};
+        int32_t m_PC = 0;
+        int32_t m_Status = 0;
+
+        std::vector<char> m_Memory;
+
         bool m_DirtyPC = false;
         bool m_Ok = true;
-        int32_t m_Status = 0;
     };
 }

@@ -5,13 +5,6 @@
 #include <RiscVM/RiscVM.hpp>
 #include <RiscVM/VM.hpp>
 
-int32_t& RiscVM::VM::R(const uint32_t r)
-{
-    if (r == 0)
-        return m_Registers[0] = 0;
-    return m_Registers[r];
-}
-
 void RiscVM::VM::Reset()
 {
     m_PC = 0;
@@ -21,14 +14,16 @@ void RiscVM::VM::Reset()
 
 void RiscVM::VM::Load(const char* pgm, const size_t len)
 {
-    memcpy(m_Memory, pgm, len);
+    if (m_Memory.size() < len)
+        m_Memory.resize(len);
+    memcpy(m_Memory.data(), pgm, len);
 }
 
 bool RiscVM::VM::Cycle()
 {
     if (m_Ok && m_PC >= 0 && m_PC < 0x8000)
     {
-        const auto inst = *reinterpret_cast<uint32_t*>(m_Memory + m_PC);
+        const auto inst = *reinterpret_cast<uint32_t*>(&m_Memory[m_PC]);
         Exec(inst);
         if (!m_DirtyPC)
             m_PC += 4;
@@ -44,7 +39,14 @@ bool RiscVM::VM::Ok() const
     return m_Ok;
 }
 
-char* RiscVM::VM::Memory()
+int32_t& RiscVM::VM::R(const uint32_t r)
+{
+    if (r == 0)
+        return m_Registers[0] = 0;
+    return m_Registers[r];
+}
+
+std::vector<char>& RiscVM::VM::Memory()
 {
     return m_Memory;
 }
@@ -344,21 +346,21 @@ void RiscVM::VM::ECALL()
         fflush(stdout);
         break;
     case 1: // puts
-        fputs(m_Memory + R(a0), stdout);
+        fputs(&m_Memory[R(a0)], stdout);
         fflush(stdout);
         break;
     case 2: // printf
-        vprintf(m_Memory + R(a0), m_Memory + R(a1));
+        vprintf(&m_Memory[R(a0)], &m_Memory[R(a1)]);
         fflush(stdout);
         break;
     case 3: // getc
         R(a0) = fgetc(stdin);
         break;
     case 4: // gets
-        fgets(m_Memory + R(a0), R(a1), stdin);
+        fgets(&m_Memory[R(a0)], R(a1), stdin);
         break;
     case 5: // scanf
-        vfscanf(stdin, m_Memory + R(a0), m_Memory + R(a1));
+        vfscanf(stdin, &m_Memory[R(a0)], &m_Memory[R(a1)]);
         break;
     case 120: // random
         {
