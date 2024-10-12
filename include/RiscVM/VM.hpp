@@ -11,6 +11,8 @@ namespace RiscVM
         void Load(const char* pgm, size_t len);
         bool Cycle();
 
+        char* ResizeBy(size_t);
+
         [[nodiscard]] char* Memory() const;
         [[nodiscard]] size_t MemorySize() const;
 

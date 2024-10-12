@@ -24,7 +24,7 @@ void RiscVM::VM::Load(const char* pgm, const size_t len)
 
 bool RiscVM::VM::Cycle()
 {
-    if (m_Ok && m_PC >= 0 && m_PC < 0x8000)
+    if (m_Ok && m_PC >= 0 && m_PC < m_MemorySize)
     {
         const auto inst = *reinterpret_cast<uint32_t*>(&m_Memory[m_PC]);
         Exec(inst);
@@ -35,6 +35,15 @@ bool RiscVM::VM::Cycle()
     }
 
     return m_Ok = false;
+}
+
+char* RiscVM::VM::ResizeBy(const size_t size)
+{
+    const auto old_size = m_MemorySize;
+    m_MemorySize += size;
+    m_Memory = static_cast<char*>(realloc(m_Memory, m_MemorySize));
+
+    return m_Memory + old_size;
 }
 
 char* RiscVM::VM::Memory() const
