@@ -40,9 +40,10 @@ namespace RiscVM
     public:
         explicit Assembler(std::istream& stream);
 
-        std::vector<char> Link();
+        std::vector<char> Parse();
 
-        void Parse();
+    private:
+        void ParseLine();
         void ParseLabel();
         void ParseCompileDirective();
         void ParseInstruction();
@@ -60,6 +61,8 @@ namespace RiscVM
         OperandPtr ParseOperand();
         OperandPtr ParsePrimary();
         OperandPtr ParseBinary(OperandPtr lhs, int min_pre);
+
+        std::vector<char> Link();
 
         [[nodiscard]] int Get() const;
         Token& Next();
