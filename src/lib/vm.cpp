@@ -37,7 +37,7 @@ bool RiscVM::VM::Cycle()
     return m_Ok = false;
 }
 
-void* RiscVM::VM::Memory() const
+char* RiscVM::VM::Memory() const
 {
     return m_Memory;
 }
