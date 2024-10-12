@@ -37,12 +37,12 @@ bool RiscVM::VM::Cycle()
     return m_Ok = false;
 }
 
-char* RiscVM::VM::ResizeBy(const size_t size)
+char* RiscVM::VM::Resize(const size_t size)
 {
     const auto old_size = m_MemorySize;
     m_MemorySize += size;
     m_Memory = static_cast<char*>(realloc(m_Memory, m_MemorySize));
-
+    memset(m_Memory + old_size, 0, size);
     return m_Memory + old_size;
 }
 
