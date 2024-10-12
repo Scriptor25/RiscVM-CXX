@@ -4,6 +4,18 @@
 
 namespace RiscVM
 {
+    union MemBuffer
+    {
+        void* PTR;
+        char* CHAR;
+        int8_t* BYTE;
+        uint8_t* UBYTE;
+        int16_t* SHORT;
+        uint16_t* USHORT;
+        int32_t* INT;
+        uint32_t* UINT;
+    };
+
     class VM
     {
     public:
@@ -14,7 +26,6 @@ namespace RiscVM
 
         int32_t& R(uint32_t);
 
-        std::vector<char>& Memory();
         [[nodiscard]] int32_t Status() const;
 
         void Exec(uint32_t data);
@@ -90,7 +101,8 @@ namespace RiscVM
         int32_t m_PC = 0;
         int32_t m_Status = 0;
 
-        std::vector<char> m_Memory;
+        MemBuffer m_Memory{};
+        size_t m_MemorySize = 0;
 
         bool m_DirtyPC = false;
         bool m_Ok = true;
