@@ -17,16 +17,16 @@ void RiscVM::VM::Load(const char* pgm, const size_t len)
     if (m_MemorySize < len)
     {
         m_MemorySize = len;
-        m_Memory.PTR = realloc(m_Memory.PTR, m_MemorySize);
+        m_Memory = static_cast<char*>(realloc(m_Memory, m_MemorySize));
     }
-    memcpy(m_Memory.PTR, pgm, len);
+    memcpy(m_Memory, pgm, len);
 }
 
 bool RiscVM::VM::Cycle()
 {
     if (m_Ok && m_PC >= 0 && m_PC < 0x8000)
     {
-        const auto inst = m_Memory.UINT[m_PC];
+        const auto inst = *reinterpret_cast<uint32_t*>(&m_Memory[m_PC]);
         Exec(inst);
         if (!m_DirtyPC)
             m_PC += 4;
@@ -37,7 +37,7 @@ bool RiscVM::VM::Cycle()
     return m_Ok = false;
 }
 
-RiscVM::MemBuffer& RiscVM::VM::Memory()
+void* RiscVM::VM::Memory() const
 {
     return m_Memory;
 }
@@ -207,42 +207,42 @@ void RiscVM::VM::BGEU(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 
 void RiscVM::VM::LB(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    R(rd) = m_Memory.UBYTE[R(rs1) + imm];
+    R(rd) = static_cast<uint8_t>(*reinterpret_cast<int8_t*>(&m_Memory[R(rs1) + imm]));
 }
 
 void RiscVM::VM::LH(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    R(rd) = m_Memory.SHORT[R(rs1) + imm];
+    R(rd) = *reinterpret_cast<int16_t*>(&m_Memory[R(rs1) + imm]);
 }
 
 void RiscVM::VM::LW(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    R(rd) = m_Memory.INT[R(rs1) + imm];
+    R(rd) = *reinterpret_cast<int32_t*>(&m_Memory[R(rs1) + imm]);
 }
 
 void RiscVM::VM::LBU(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    R(rd) = m_Memory.UBYTE[R(rs1) + imm];
+    R(rd) = *reinterpret_cast<uint8_t*>(&m_Memory[R(rs1) + imm]);
 }
 
 void RiscVM::VM::LHU(const uint32_t rd, const uint32_t rs1, const int32_t imm)
 {
-    R(rd) = m_Memory.USHORT[R(rs1) + imm];
+    R(rd) = *reinterpret_cast<uint16_t*>(&m_Memory[R(rs1) + imm]);
 }
 
 void RiscVM::VM::SB(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    m_Memory.BYTE[R(rs2) + imm] = static_cast<int8_t>(R(rs1));
+    *reinterpret_cast<int8_t*>(&m_Memory[R(rs2) + imm]) = static_cast<int8_t>(R(rs1));
 }
 
 void RiscVM::VM::SH(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    m_Memory.SHORT[R(rs2) + imm] = static_cast<int16_t>(R(rs1));
+    *reinterpret_cast<int16_t*>(&m_Memory[R(rs2) + imm]) = static_cast<int16_t>(R(rs1));
 }
 
 void RiscVM::VM::SW(const uint32_t rs1, const uint32_t rs2, const int32_t imm)
 {
-    m_Memory.INT[R(rs2) + imm] = R(rs1);
+    *reinterpret_cast<int32_t*>(&m_Memory[R(rs2) + imm]) = R(rs1);
 }
 
 void RiscVM::VM::ADDI(const uint32_t rd, const uint32_t rs1, const int32_t imm)
@@ -354,21 +354,21 @@ void RiscVM::VM::ECALL()
         fflush(stdout);
         break;
     case 1: // puts
-        fputs(&m_Memory.CHAR[R(a0)], stdout);
+        fputs(&m_Memory[R(a0)], stdout);
         fflush(stdout);
         break;
     case 2: // printf
-        vprintf(&m_Memory.CHAR[R(a0)], &m_Memory.CHAR[R(a1)]);
+        vprintf(&m_Memory[R(a0)], &m_Memory[R(a1)]);
         fflush(stdout);
         break;
     case 3: // getc
         R(a0) = fgetc(stdin);
         break;
     case 4: // gets
-        fgets(&m_Memory.CHAR[R(a0)], R(a1), stdin);
+        fgets(&m_Memory[R(a0)], R(a1), stdin);
         break;
     case 5: // scanf
-        vfscanf(stdin, &m_Memory.CHAR[R(a0)], &m_Memory.CHAR[R(a1)]);
+        vfscanf(stdin, &m_Memory[R(a0)], &m_Memory[R(a1)]);
         break;
     case 120: // random
         {

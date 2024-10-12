@@ -4,18 +4,6 @@
 
 namespace RiscVM
 {
-    union MemBuffer
-    {
-        void* PTR;
-        char* CHAR;
-        int8_t* BYTE;
-        uint8_t* UBYTE;
-        int16_t* SHORT;
-        uint16_t* USHORT;
-        int32_t* INT;
-        uint32_t* UINT;
-    };
-
     class VM
     {
     public:
@@ -23,18 +11,8 @@ namespace RiscVM
         void Load(const char* pgm, size_t len);
         bool Cycle();
 
-        MemBuffer& Memory();
+        [[nodiscard]] void* Memory() const;
         [[nodiscard]] size_t MemorySize() const;
-
-        template <typename T>
-        T* Append(const size_t size)
-        {
-            const auto old_size = m_MemorySize;
-            m_MemorySize += size;
-            m_Memory.PTR = realloc(m_Memory.PTR, m_MemorySize);
-
-            return reinterpret_cast<T*>(m_Memory.BYTE + old_size);
-        }
 
         [[nodiscard]] bool Ok() const;
         [[nodiscard]] int32_t Status() const;
@@ -114,7 +92,7 @@ namespace RiscVM
         int32_t m_PC = 0;
         int32_t m_Status = 0;
 
-        MemBuffer m_Memory{};
+        char* m_Memory = nullptr;
         size_t m_MemorySize = 0;
 
         bool m_DirtyPC = false;
