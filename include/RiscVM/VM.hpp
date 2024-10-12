@@ -33,7 +33,7 @@ namespace RiscVM
             m_MemorySize += size;
             m_Memory.PTR = realloc(m_Memory.PTR, m_MemorySize);
 
-            return reinterpret_cast<T*>(m_Memory.PTR + old_size);
+            return reinterpret_cast<T*>(m_Memory.BYTE + old_size);
         }
 
         [[nodiscard]] bool Ok() const;
