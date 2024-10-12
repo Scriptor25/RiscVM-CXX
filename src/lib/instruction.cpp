@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/ISA.hpp>
 #include <RiscVM/Operand.hpp>

@@ -8,10 +8,8 @@ add_subdirectory(deps/elfio)
 
 option(RISCVM_BUILD_EXAMPLE "Specify if the main executable should be build" ${PROJECT_IS_TOP_LEVEL})
 
-if (${PROJECT_IS_TOP_LEVEL})
-    set(CMAKE_CXX_STANDARD 20)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif ()
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB_RECURSE src "src/lib/*.cpp" "include/*.hpp")
 add_library(LibRiscVM ${src})

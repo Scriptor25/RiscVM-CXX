@@ -1,9 +1,9 @@
+#include <stdexcept>
 #include <unordered_map>
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 #include <RiscVM/Section.hpp>
 #include <RiscVM/Symbol.hpp>
-#include <utility>
 
 uint32_t RiscVM::Operand::AsRegister() const
 {
