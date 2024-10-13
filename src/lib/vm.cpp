@@ -37,15 +37,6 @@ bool RiscVM::VM::Cycle()
     return m_Ok = false;
 }
 
-char* RiscVM::VM::Resize(const size_t size)
-{
-    const auto old_size = m_MemorySize;
-    m_MemorySize += size;
-    m_Memory = static_cast<char*>(realloc(m_Memory, m_MemorySize));
-    memset(m_Memory + old_size, 0, size);
-    return m_Memory + old_size;
-}
-
 char* RiscVM::VM::Memory() const
 {
     return m_Memory;
@@ -61,7 +52,7 @@ bool& RiscVM::VM::Ok()
     return m_Ok;
 }
 
-int32_t RiscVM::VM::Status() const
+int32_t& RiscVM::VM::Status()
 {
     return m_Status;
 }
@@ -71,6 +62,11 @@ int32_t& RiscVM::VM::R(const uint32_t r)
     if (r == 0)
         return m_Registers[0] = 0;
     return m_Registers[r];
+}
+
+std::map<int, RiscVM::ECall>& RiscVM::VM::ECallMap()
+{
+    return m_ECallMap;
 }
 
 void RiscVM::VM::Exec(const uint32_t data)

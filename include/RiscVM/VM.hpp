@@ -1,9 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
+#include <map>
 
 namespace RiscVM
 {
+    typedef std::function<void(class VM& vm)> ECall;
+
     class VM
     {
     public:
@@ -11,16 +15,17 @@ namespace RiscVM
         void Load(const char* pgm, size_t len);
         bool Cycle();
 
-        char* Resize(size_t);
-
         [[nodiscard]] char* Memory() const;
         [[nodiscard]] size_t MemorySize() const;
 
         bool& Ok();
-        [[nodiscard]] int32_t Status() const;
+        int32_t& Status();
 
         int32_t& R(uint32_t);
 
+        std::map<int, ECall>& ECallMap();
+
+    private:
         void Exec(uint32_t data);
 
         void LUI(uint32_t rd, int32_t imm);
@@ -83,5 +88,7 @@ namespace RiscVM
 
         bool m_DirtyPC = false;
         bool m_Ok = true;
+
+        std::map<int, ECall> m_ECallMap;
     };
 }

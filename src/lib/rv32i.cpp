@@ -232,44 +232,7 @@ void RiscVM::VM::FENCE(const uint32_t rd, const uint32_t rs1, const uint32_t fm_
 
 void RiscVM::VM::ECALL()
 {
-    switch (R(a7))
-    {
-    case 0: // putc
-        fputc(R(a0), stdout);
-        fflush(stdout);
-        break;
-    case 1: // puts
-        fputs(&m_Memory[R(a0)], stdout);
-        fflush(stdout);
-        break;
-    case 2: // printf
-        vprintf(&m_Memory[R(a0)], &m_Memory[R(a1)]);
-        fflush(stdout);
-        break;
-    case 3: // getc
-        R(a0) = fgetc(stdin);
-        break;
-    case 4: // gets
-        fgets(&m_Memory[R(a0)], R(a1), stdin);
-        break;
-    case 5: // scanf
-        vfscanf(stdin, &m_Memory[R(a0)], &m_Memory[R(a1)]);
-        break;
-    case 120: // random
-        {
-            static std::random_device dev;
-            static std::mt19937 rng(dev());
-            std::uniform_int_distribution<std::mt19937::result_type> dist(R(a0), R(a1));
-            R(a0) = static_cast<int32_t>(dist(rng));
-        }
-        break;
-    case 127:
-        m_Ok = false;
-        m_Status = R(a0);
-        break;
-    default:
-        break;
-    }
+    m_ECallMap[R(a7)](*this);
 }
 
 void RiscVM::VM::EBREAK()

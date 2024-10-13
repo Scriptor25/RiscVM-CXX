@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <vector>
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/VM.hpp>
@@ -11,6 +12,47 @@ static int exec(const char* pgm, const size_t size)
     RiscVM::VM vm;
     vm.Load(pgm, size);
     vm.Reset();
+
+    auto& ecall_map = vm.ECallMap();
+    ecall_map[0] = [](RiscVM::VM& vm_)
+    {
+        fputc(vm_.R(RiscVM::a0), stdout);
+        fflush(stdout);
+    };
+    ecall_map[1] = [](RiscVM::VM& vm_)
+    {
+        fputs(vm_.Memory() + vm_.R(RiscVM::a0), stdout);
+        fflush(stdout);
+    };
+    ecall_map[2] = [](RiscVM::VM& vm_)
+    {
+        vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
+        fflush(stdout);
+    };
+    ecall_map[3] = [](RiscVM::VM& vm_)
+    {
+        vm_.R(RiscVM::a0) = fgetc(stdin);
+    };
+    ecall_map[4] = [](RiscVM::VM& vm_)
+    {
+        fgets(vm_.Memory() + vm_.R(RiscVM::a0), vm_.R(RiscVM::a1), stdin);
+    };
+    ecall_map[5] = [](RiscVM::VM& vm_)
+    {
+        vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
+    };
+    ecall_map[120] = [](RiscVM::VM& vm_)
+    {
+        static std::random_device dev;
+        static std::mt19937 rng(dev());
+        std::uniform_int_distribution<std::mt19937::result_type> dist(vm_.R(RiscVM::a0), vm_.R(RiscVM::a1));
+        vm_.R(RiscVM::a0) = static_cast<int32_t>(dist(rng));
+    };
+    ecall_map[127] = [](RiscVM::VM& vm_)
+    {
+        vm_.Ok() = false;
+        vm_.Status() = vm_.R(RiscVM::a0);
+    };
 
     do vm.Cycle();
     while (vm.Ok());
