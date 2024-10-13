@@ -1,7 +1,7 @@
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 
-bool RiscVM::Assembler::ParsePseudoNOP(const std::string& name, std::vector<OperandPtr>& operands) const
+bool RiscVM::Assembler::ParseNoOp(const std::string& name, std::vector<OperandPtr>& operands) const
 {
     // no-op: nop
     // addi zero,zero,0

@@ -25,14 +25,12 @@ void RiscVM::Assembler::ParseInstruction()
 
 bool RiscVM::Assembler::ParsePseudo(const std::string& name, std::vector<OperandPtr>& operands) const
 {
-    if (ParsePseudoLA(name, operands)) return true;
-    if (ParsePseudoLoad(name, operands)) return true;
-    if (ParsePseudoStore(name, operands)) return true;
-    if (ParsePseudoNOP(name, operands)) return true;
-    if (ParsePseudoLI(name, operands)) return true;
-    if (ParsePseudoMV(name, operands)) return true;
-    if (ParsePseudoJump(name, operands)) return true;
-    if (ParsePseudoCall(name, operands)) return true;
+    if (ParseLoad(name, operands)) return true;
+    if (ParseStore(name, operands)) return true;
+    if (ParseNoOp(name, operands)) return true;
+    if (ParseMove(name, operands)) return true;
+    if (ParseJump(name, operands)) return true;
+    if (ParseCall(name, operands)) return true;
 
     return false;
 }

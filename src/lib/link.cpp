@@ -1,31 +1,38 @@
+#include <ranges>
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Instruction.hpp>
 #include <RiscVM/ISA.hpp>
 #include <RiscVM/Operand.hpp>
 #include <RiscVM/Section.hpp>
 
-std::vector<char> RiscVM::Assembler::Link()
+std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
 {
-    auto& text = m_Sections[".text"];
-    text.Offset = 0;
-    auto& data = m_Sections[".data"];
-    data.Offset = text.Offset + text.Size();
-    auto& rodata = m_Sections[".rodata"];
-    rodata.Offset = data.Offset + data.Size();
-    auto& bss = m_Sections[".bss"];
-    bss.Offset = rodata.Offset + rodata.Size();
-
-    std::vector<char> dest(bss.Offset + bss.Size());
-
-    for (auto& [name, section] : m_Sections)
+    size_t off = 0;
+    for (auto& [l_name_, l_align_, l_size_, l_offset_] : link_info.Sections)
     {
-        if (section.Offset < 0) continue;
-        memcpy(dest.data() + section.Offset, section.Data.data(), section.Data.size());
-        for (auto& [offset, rv, operands] : section.Instructions)
+        auto align = 1 << l_align_;
+        if (const auto rem = off % align)
+            off += align - rem;
+
+        auto& [offset_, instructions_, data_] = m_Sections[l_name_];
+        l_offset_ = offset_ = off;
+
+        if (l_size_) off += l_size_;
+        else off += l_size_ = data_.size();
+    }
+
+    std::vector<char> dest(off);
+
+    for (auto& [l_name_, l_align_, l_size_, l_offset_] : link_info.Sections)
+    {
+        auto& [offset_, instructions_, data_] = m_Sections[l_name_];
+        if (offset_ < 0) continue;
+        memcpy(dest.data() + offset_, data_.data(), data_.size());
+        for (auto& [i_offset_, i_rv_, i_operands_] : instructions_)
         {
-            const auto ptr = reinterpret_cast<uint32_t*>(dest.data() + section.Offset + offset);
-            const auto i = static_cast<uint32_t>(rv);
-            switch (rv)
+            const auto ptr = reinterpret_cast<uint32_t*>(dest.data() + offset_ + i_offset_);
+            const auto i = static_cast<uint32_t>(i_rv_);
+            switch (i_rv_)
             {
             case RV32IM_ADD:
             case RV32IM_SUB:
@@ -49,10 +56,10 @@ std::vector<char> RiscVM::Assembler::Link()
                     const Format::R x
                     {
                         .Opcode = i & 0b1111111,
-                        .Rd = operands[0]->AsRegister(),
+                        .Rd = i_operands_[0]->AsRegister(),
                         .Func3 = i >> 7 & 0b111,
-                        .Rs1 = operands[1]->AsRegister(),
-                        .Rs2 = operands[2]->AsRegister(),
+                        .Rs1 = i_operands_[1]->AsRegister(),
+                        .Rs2 = i_operands_[2]->AsRegister(),
                         .Func7 = i >> 10 & 0b1111111,
                     };
                     *ptr = x.Data;
@@ -61,11 +68,11 @@ std::vector<char> RiscVM::Assembler::Link()
 
             case RV32IM_JALR:
                 {
-                    const auto o = std::dynamic_pointer_cast<OffsetOperand>(operands[1]);
+                    const auto o = std::dynamic_pointer_cast<OffsetOperand>(i_operands_[1]);
                     Format::I x
                     {
                         .Opcode = i & 0b1111111,
-                        .Rd = operands[0]->AsRegister(),
+                        .Rd = i_operands_[0]->AsRegister(),
                         .Func3 = i >> 7 & 0b111,
                         .Rs1 = o->Base->AsRegister(),
                     };
@@ -92,11 +99,11 @@ std::vector<char> RiscVM::Assembler::Link()
             case RV32IM_LBU:
             case RV32IM_LHU:
                 {
-                    const auto o = std::dynamic_pointer_cast<OffsetOperand>(operands[1]);
+                    const auto o = std::dynamic_pointer_cast<OffsetOperand>(i_operands_[1]);
                     Format::I x
                     {
                         .Opcode = i & 0b1111111,
-                        .Rd = operands[0]->AsRegister(),
+                        .Rd = i_operands_[0]->AsRegister(),
                         .Func3 = i >> 7 & 0b111,
                         .Rs1 = o->Base->AsRegister(),
                     };
@@ -119,11 +126,11 @@ std::vector<char> RiscVM::Assembler::Link()
                     Format::I x
                     {
                         .Opcode = i & 0b1111111,
-                        .Rd = operands[0]->AsRegister(),
+                        .Rd = i_operands_[0]->AsRegister(),
                         .Func3 = i >> 7 & 0b111,
-                        .Rs1 = operands[1]->AsRegister(),
+                        .Rs1 = i_operands_[1]->AsRegister(),
                     };
-                    x.Immediate(operands[2]->AsImmediate());
+                    x.Immediate(i_operands_[2]->AsImmediate());
                     *ptr = x.Data;
                 }
                 break; // I
@@ -132,12 +139,12 @@ std::vector<char> RiscVM::Assembler::Link()
             case RV32IM_SH:
             case RV32IM_SW:
                 {
-                    const auto o = std::dynamic_pointer_cast<OffsetOperand>(operands[1]);
+                    const auto o = std::dynamic_pointer_cast<OffsetOperand>(i_operands_[1]);
                     Format::S x
                     {
                         .Opcode = i & 0b1111111,
                         .Func3 = i >> 7 & 0b111,
-                        .Rs1 = operands[0]->AsRegister(),
+                        .Rs1 = i_operands_[0]->AsRegister(),
                         .Rs2 = o->Base->AsRegister(),
                     };
                     x.Immediate(o->Offset->AsImmediate());
@@ -156,10 +163,10 @@ std::vector<char> RiscVM::Assembler::Link()
                     {
                         .Opcode = i & 0b1111111,
                         .Func3 = i >> 7 & 0b111,
-                        .Rs1 = operands[0]->AsRegister(),
-                        .Rs2 = operands[1]->AsRegister(),
+                        .Rs1 = i_operands_[0]->AsRegister(),
+                        .Rs2 = i_operands_[1]->AsRegister(),
                     };
-                    x.Immediate(operands[2]->AsImmediate());
+                    x.Immediate(i_operands_[2]->AsImmediate());
                     *ptr = x.Data;
                 }
                 break; // B
@@ -170,9 +177,9 @@ std::vector<char> RiscVM::Assembler::Link()
                     Format::U x
                     {
                         .Opcode = i & 0b1111111,
-                        .Rd = operands[0]->AsRegister(),
+                        .Rd = i_operands_[0]->AsRegister(),
                     };
-                    x.Immediate(operands[1]->AsImmediate() << 12);
+                    x.Immediate(i_operands_[1]->AsImmediate() << 12);
                     *ptr = x.Data;
                 }
                 break; // U
@@ -182,9 +189,9 @@ std::vector<char> RiscVM::Assembler::Link()
                     Format::J x
                     {
                         .Opcode = i & 0b1111111,
-                        .Rd = operands[0]->AsRegister(),
+                        .Rd = i_operands_[0]->AsRegister(),
                     };
-                    x.Immediate(operands[1]->AsImmediate());
+                    x.Immediate(i_operands_[1]->AsImmediate());
                     *ptr = x.Data;
                 }
                 break; // J

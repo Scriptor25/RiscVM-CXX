@@ -35,12 +35,25 @@ namespace RiscVM
     std::ostream& operator<<(std::ostream& os, const TokenType& type);
     std::ostream& operator<<(std::ostream& os, const Token& token);
 
+    struct SectionLinkInfo
+    {
+        std::string Name;
+        size_t Align = 0;
+        size_t Size = 0;
+        size_t Offset = 0;
+    };
+
+    struct LinkInfo
+    {
+        std::vector<SectionLinkInfo> Sections;
+    };
+
     class Assembler
     {
     public:
         explicit Assembler(std::istream& stream);
 
-        std::vector<char> Parse();
+        std::vector<char> Parse(LinkInfo&);
 
     private:
         void ParseLine();
@@ -49,20 +62,18 @@ namespace RiscVM
         void ParseInstruction();
 
         bool ParsePseudo(const std::string& name, std::vector<OperandPtr>& operands) const;
-        bool ParsePseudoLA(const std::string& name, std::vector<OperandPtr>& operands) const;
-        bool ParsePseudoLoad(const std::string& name, std::vector<OperandPtr>& operands) const;
-        bool ParsePseudoStore(const std::string& name, std::vector<OperandPtr>& operands) const;
-        bool ParsePseudoNOP(const std::string& name, std::vector<OperandPtr>& operands) const;
-        bool ParsePseudoLI(const std::string& name, std::vector<OperandPtr>& operands) const;
-        bool ParsePseudoMV(const std::string& name, std::vector<OperandPtr>& operands) const;
-        bool ParsePseudoJump(const std::string& name, std::vector<OperandPtr>& operands) const;
-        bool ParsePseudoCall(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParseLoad(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParseStore(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParseNoOp(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParseMove(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParseJump(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParseCall(const std::string& name, std::vector<OperandPtr>& operands) const;
 
         OperandPtr ParseOperand();
         OperandPtr ParsePrimary();
         OperandPtr ParseBinary(OperandPtr lhs, int min_pre);
 
-        std::vector<char> Link();
+        std::vector<char> Link(LinkInfo&);
 
         [[nodiscard]] int Get() const;
         Token& Next();

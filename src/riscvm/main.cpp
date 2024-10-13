@@ -92,10 +92,20 @@ int main(const int argc, const char* const* argv)
     // TODO: different input type: asm, bin, elf, coff, ...
     if (in_type == "asm")
     {
+        RiscVM::LinkInfo link_info
+        {
+            {
+                {".text", 2},
+                {".data"},
+                {".rodata"},
+                {".bss"},
+            }
+        };
+
         std::ifstream stream(in_filename);
         if (stream.is_open())
-            pgm = RiscVM::Assembler(stream).Parse();
-        else pgm = RiscVM::Assembler(std::cin).Parse();
+            pgm = RiscVM::Assembler(stream).Parse(link_info);
+        else pgm = RiscVM::Assembler(std::cin).Parse(link_info);
         stream.close();
 
         if (!out_filename.empty())

@@ -34,11 +34,11 @@ RiscVM::Assembler::Assembler(std::istream& stream)
     m_ActiveSection = &m_Sections[".text"];
 }
 
-std::vector<char> RiscVM::Assembler::Parse()
+std::vector<char> RiscVM::Assembler::Parse(LinkInfo& link_info)
 {
     while (!At(TokenType_EOF))
         ParseLine();
-    return Link();
+    return Link(link_info);
 }
 
 void RiscVM::Assembler::ParseLine()

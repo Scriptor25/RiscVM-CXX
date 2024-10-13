@@ -1,7 +1,7 @@
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 
-bool RiscVM::Assembler::ParsePseudoCall(const std::string& name, std::vector<OperandPtr>& operands) const
+bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPtr>& operands) const
 {
     // return: ret
     // jalr zero,0(ra)

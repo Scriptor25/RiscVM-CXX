@@ -1,7 +1,7 @@
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 
-bool RiscVM::Assembler::ParsePseudoMV(const std::string& name, std::vector<OperandPtr>& operands) const
+bool RiscVM::Assembler::ParseMove(const std::string& name, std::vector<OperandPtr>& operands) const
 {
     // move: mv rd,rs1
     // addi rd,rs1,0

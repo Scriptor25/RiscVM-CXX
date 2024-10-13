@@ -9,8 +9,9 @@ void RiscVM::Assembler::ParseCompileDirective()
     if (directive == ".align")
     {
         const auto n = ParseOperand()->AsImmediate();
-        if (const auto rem = m_ActiveSection->Size() % n)
-            m_ActiveSection->Skip(n - rem);
+        const auto align = 1 << n;
+        if (const auto rem = m_ActiveSection->Size() % align)
+            m_ActiveSection->Skip(align - rem);
         return;
     }
     if (directive == ".ascii")
