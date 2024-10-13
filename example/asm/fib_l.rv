@@ -10,21 +10,19 @@ _start:
     ecall           ; exit(x)
 
 ;
-; Fibonacci
-; Args:
-;  a0: n
+; int fib(int n)
 ;
 fib:
     addi t0,zero,0  ; a = 0
     addi t1,zero,1  ; b = 0
     addi t2,zero,0  ; i = 0
-loop:
-    bge  t2,a0,end  ; if i >= n goto end
+.loop:
+    bge  t2,a0,.end ; if i >= n goto end
     addi t2,t2,1    ; i++
     add  t3,t0,t1   ; x = a + b
     mv   t0,t1      ; a = b
     mv   t1,t3      ; b = x
-    j    loop       ; goto loop
-end:
+    j    .loop      ; goto loop
+.end:
     mv   a0,t0
     ret             ; return a

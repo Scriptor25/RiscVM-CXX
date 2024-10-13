@@ -1,5 +1,5 @@
 .section .rodata
-message: .ascii 'Hello World!',0
+message: .ascii 'Hello World!',10,0
 
 .section .text
 _start:
