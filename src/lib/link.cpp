@@ -37,9 +37,6 @@ std::vector<char> RiscVM::Assembler::Link()
             case RV32IM_SRA:
             case RV32IM_OR:
             case RV32IM_AND:
-            case RV32IM_CSRRW:
-            case RV32IM_CSRRS:
-            case RV32IM_CSRRC:
             case RV32IM_MUL:
             case RV32IM_MULH:
             case RV32IM_MULHSU:
@@ -118,10 +115,6 @@ std::vector<char> RiscVM::Assembler::Link()
             case RV32IM_SRLI:
             case RV32IM_SRAI:
             case RV32IM_FENCE:
-            case RV32IM_FENCEI:
-            case RV32IM_CSRRWI:
-            case RV32IM_CSRRSI:
-            case RV32IM_CSRRCI:
                 {
                     Format::I x
                     {

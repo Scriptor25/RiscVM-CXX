@@ -3,6 +3,10 @@
 .set MINES  10
 .set AREA   WIDTH * HEIGHT
 
+.section .rodata
+msg_loose: .ascii 'Game Over! You loose!',10,0
+msg_win:   .ascii 'Game Over! You win!',10,0
+
 .section .bss
 field: .skip AREA
 
@@ -19,11 +23,25 @@ _start:
     call place_mines
     call print_field
 
-.0: call user_input
+.0:
+    call user_input
     call print_field
     call check_state
     beq  a0,zero,.0
 
+    addi t0,zero,1
+    beq  a0,t0,.loose
+
+.win:
+    la   a0,msg_win
+    call puts
+    j    .end
+
+.loose:
+    la   a0,msg_loose
+    call puts
+
+.end: j .
     addi a0,zero,0
     call exit
 
@@ -301,13 +319,21 @@ user_input:
 ; int check_state()
 ;
 check_state:
+    ; set counter to 0
     ; iterate over all cells
     ;  if the current cell is a mine and is open
-    ;   then return non-zero
-    ; return zero
-    pushw ra,s0,s1
+    ;   then return 1
+    ;   else if it is not a mine and is open
+    ;    then increment counter
+    ; if counter is number of cells minus number of mines
+    ;  then return 2
+    ; return 0
+
+    pushw ra,s0,s1,s2
 
     addi s0,zero,0
+    addi s2,zero,0
+
 .loop:
     addi t0,zero,AREA
     bge  s0,t0,.end
@@ -318,20 +344,38 @@ check_state:
 
     mv   a0,s1
     call is_mine
-    beq  a0,zero,.continue
+    beq  a0,zero,.not_mine
+    mv   a0,s1
+    call is_open
+    bne  a0,zero,.loose
+    j .continue
+
+.not_mine:
     mv   a0,s1
     call is_open
     beq  a0,zero,.continue
 
-    popw s1,s0,ra
-    ret
+    addi s2,s2,1
 
 .continue:
     addi s0,s0,1
     j    .loop
+
+.loose:
+    addi a0,zero,1
+    j    .ret
+
+.win:
+    addi a0,zero,2
+    j    .ret
+
 .end:
+    addi t0,zero,AREA - MINES
+    beq  s2,t0,.win
+
     addi a0,zero,0
-    popw s1,s0,ra
+.ret:
+    popw s2,s1,s0,ra
     ret
 
 ;
@@ -488,6 +532,14 @@ clear_flag:
 ;
 putc:
     addi a7,zero,0
+    ecall
+    ret
+
+;
+; void puts(char* str)
+;
+puts:
+    addi a7,zero,1
     ecall
     ret
 

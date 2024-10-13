@@ -203,7 +203,16 @@ RiscVM::OperandPtr RiscVM::Assembler::ParseBinary(OperandPtr lhs, const int min_
 {
     static std::unordered_map<std::string, int> precedences
     {
-        {"", 0},
+        {"*", 10}, {"/", 10}, {"%", 10},
+        {"+", 9}, {"-", 9},
+        {"<<", 8}, {">>", 8},
+        {"<", 7}, {"<=", 7}, {">", 7}, {">=", 7},
+        {"==", 6}, {"!=", 6},
+        {"&", 5},
+        {"^", 4},
+        {"|", 3},
+        {"&&", 2},
+        {"||", 1},
     };
 
     while (At(TokenType_Operator) && precedences[m_Token.Value] >= min_pre)

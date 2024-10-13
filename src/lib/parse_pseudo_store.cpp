@@ -1,9 +1,7 @@
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 
-bool RiscVM::Assembler::ParsePseudoStore(
-    const std::string& name,
-    std::vector<OperandPtr>& operands) const
+bool RiscVM::Assembler::ParsePseudoStore(const std::string& name, std::vector<OperandPtr>& operands) const
 {
     // store global: sX rs,sym,rt
     // auipc rt,(sym-pc)[31:12]+(sym-pc)[11]

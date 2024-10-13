@@ -6,33 +6,6 @@
 void RiscVM::Assembler::ParseCompileDirective()
 {
     const auto directive = Expect(TokenType_Symbol).Value;
-    if (directive == ".section")
-    {
-        const auto section = Expect(TokenType_Symbol).Value;
-        m_ActiveSection = &m_Sections[section];
-        return;
-    }
-    if (directive == ".set")
-    {
-        const auto label = Expect(TokenType_Symbol).Value;
-        const auto imm = ParseOperand()->AsImmediate();
-        auto& symbol = m_SymbolTable[label];
-        symbol.Base = reinterpret_cast<Section*>(1);
-        symbol.Offset = imm;
-        return;
-    }
-    if (directive == ".globl")
-    {
-        const auto label = Expect(TokenType_Symbol).Value;
-        m_SymbolTable[label].Global = true;
-        return;
-    }
-    if (directive == ".skip")
-    {
-        const auto n = ParseOperand()->AsImmediate();
-        m_ActiveSection->Skip(n);
-        return;
-    }
     if (directive == ".align")
     {
         const auto n = ParseOperand()->AsImmediate();
@@ -49,6 +22,33 @@ void RiscVM::Assembler::ParseCompileDirective()
                 for (auto str = Expect(TokenType_Char).Value; const auto c : str)
                     m_ActiveSection->Data.push_back(c);
         while (NextAt(TokenType_Comma));
+        return;
+    }
+    if (directive == ".globl")
+    {
+        const auto label = Expect(TokenType_Symbol).Value;
+        m_SymbolTable[label].Global = true;
+        return;
+    }
+    if (directive == ".section")
+    {
+        const auto section = Expect(TokenType_Symbol).Value;
+        m_ActiveSection = &m_Sections[section];
+        return;
+    }
+    if (directive == ".set")
+    {
+        const auto label = Expect(TokenType_Symbol).Value;
+        const auto imm = ParseOperand()->AsImmediate();
+        auto& symbol = m_SymbolTable[label];
+        symbol.Base = reinterpret_cast<Section*>(1);
+        symbol.Offset = imm;
+        return;
+    }
+    if (directive == ".skip")
+    {
+        const auto n = ParseOperand()->AsImmediate();
+        m_ActiveSection->Skip(n);
         return;
     }
     if (directive == ".word")

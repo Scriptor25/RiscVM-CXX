@@ -13,7 +13,7 @@ void RiscVM::Assembler::ParseInstruction()
         do operands.push_back(ParseOperand());
         while (NextAt(TokenType_Comma));
 
-    if (ParsePseudoInstruction(name, operands))
+    if (ParsePseudo(name, operands))
         return;
 
     const auto rv = GetInstruction(name);
@@ -23,7 +23,7 @@ void RiscVM::Assembler::ParseInstruction()
     m_ActiveSection->EmplaceBack(rv, operands);
 }
 
-bool RiscVM::Assembler::ParsePseudoInstruction(const std::string& name, std::vector<OperandPtr>& operands) const
+bool RiscVM::Assembler::ParsePseudo(const std::string& name, std::vector<OperandPtr>& operands) const
 {
     if (ParsePseudoLA(name, operands)) return true;
     if (ParsePseudoLoad(name, operands)) return true;

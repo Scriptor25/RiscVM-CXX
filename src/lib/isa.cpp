@@ -271,12 +271,9 @@ static std::unordered_map<std::string, RiscVM::RV32IM> string_to_instruction
     {"sll", RiscVM::RV32IM_SLL}, {"slt", RiscVM::RV32IM_SLT}, {"sltu", RiscVM::RV32IM_SLTU},
     {"xor", RiscVM::RV32IM_XOR}, {"srl", RiscVM::RV32IM_SRL}, {"sra", RiscVM::RV32IM_SRA}, {"or", RiscVM::RV32IM_OR},
     {"and", RiscVM::RV32IM_AND}, {"fence", RiscVM::RV32IM_FENCE}, {"ecall", RiscVM::RV32IM_ECALL},
-    {"ebreak", RiscVM::RV32IM_EBREAK}, {"fencei", RiscVM::RV32IM_FENCEI}, {"csrrw", RiscVM::RV32IM_CSRRW},
-    {"csrrs", RiscVM::RV32IM_CSRRS}, {"csrrc", RiscVM::RV32IM_CSRRC}, {"csrrwi", RiscVM::RV32IM_CSRRWI},
-    {"csrrsi", RiscVM::RV32IM_CSRRSI}, {"csrrci", RiscVM::RV32IM_CSRRCI}, {"mul", RiscVM::RV32IM_MUL},
-    {"mulh", RiscVM::RV32IM_MULH}, {"mulhsu", RiscVM::RV32IM_MULHSU}, {"mulhu", RiscVM::RV32IM_MULHU},
-    {"div", RiscVM::RV32IM_DIV}, {"divu", RiscVM::RV32IM_DIVU}, {"rem", RiscVM::RV32IM_REM},
-    {"remu", RiscVM::RV32IM_REMU},
+    {"ebreak", RiscVM::RV32IM_EBREAK}, {"mul", RiscVM::RV32IM_MUL}, {"mulh", RiscVM::RV32IM_MULH},
+    {"mulhsu", RiscVM::RV32IM_MULHSU}, {"mulhu", RiscVM::RV32IM_MULHU}, {"div", RiscVM::RV32IM_DIV},
+    {"divu", RiscVM::RV32IM_DIVU}, {"rem", RiscVM::RV32IM_REM}, {"remu", RiscVM::RV32IM_REMU},
 };
 
 static std::unordered_map<RiscVM::RV32IM, const char*> instruction_to_string
@@ -293,12 +290,9 @@ static std::unordered_map<RiscVM::RV32IM, const char*> instruction_to_string
     {RiscVM::RV32IM_SLL, "sll"}, {RiscVM::RV32IM_SLT, "slt"}, {RiscVM::RV32IM_SLTU, "sltu"},
     {RiscVM::RV32IM_XOR, "xor"}, {RiscVM::RV32IM_SRL, "srl"}, {RiscVM::RV32IM_SRA, "sra"}, {RiscVM::RV32IM_OR, "or"},
     {RiscVM::RV32IM_AND, "and"}, {RiscVM::RV32IM_FENCE, "fence"}, {RiscVM::RV32IM_ECALL, "ecall"},
-    {RiscVM::RV32IM_EBREAK, "ebreak"}, {RiscVM::RV32IM_FENCEI, "fencei"}, {RiscVM::RV32IM_CSRRW, "csrrw"},
-    {RiscVM::RV32IM_CSRRS, "csrrs"}, {RiscVM::RV32IM_CSRRC, "csrrc"}, {RiscVM::RV32IM_CSRRWI, "csrrwi"},
-    {RiscVM::RV32IM_CSRRSI, "csrrsi"}, {RiscVM::RV32IM_CSRRCI, "csrrci"}, {RiscVM::RV32IM_MUL, "mul"},
-    {RiscVM::RV32IM_MULH, "mulh"}, {RiscVM::RV32IM_MULHSU, "mulhsu"}, {RiscVM::RV32IM_MULHU, "mulhu"},
-    {RiscVM::RV32IM_DIV, "div"}, {RiscVM::RV32IM_DIVU, "divu"}, {RiscVM::RV32IM_REM, "rem"},
-    {RiscVM::RV32IM_REMU, "remu"},
+    {RiscVM::RV32IM_EBREAK, "ebreak"}, {RiscVM::RV32IM_MUL, "mul"}, {RiscVM::RV32IM_MULH, "mulh"},
+    {RiscVM::RV32IM_MULHSU, "mulhsu"}, {RiscVM::RV32IM_MULHU, "mulhu"}, {RiscVM::RV32IM_DIV, "div"},
+    {RiscVM::RV32IM_DIVU, "divu"}, {RiscVM::RV32IM_REM, "rem"}, {RiscVM::RV32IM_REMU, "remu"},
 };
 
 const char* RiscVM::RegisterName(const uint32_t reg)

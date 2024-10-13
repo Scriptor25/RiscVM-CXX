@@ -48,7 +48,7 @@ namespace RiscVM
         void ParseCompileDirective();
         void ParseInstruction();
 
-        bool ParsePseudoInstruction(const std::string& name, std::vector<OperandPtr>& operands) const;
+        bool ParsePseudo(const std::string& name, std::vector<OperandPtr>& operands) const;
         bool ParsePseudoLA(const std::string& name, std::vector<OperandPtr>& operands) const;
         bool ParsePseudoLoad(const std::string& name, std::vector<OperandPtr>& operands) const;
         bool ParsePseudoStore(const std::string& name, std::vector<OperandPtr>& operands) const;

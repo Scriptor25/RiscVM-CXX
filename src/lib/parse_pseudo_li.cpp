@@ -1,9 +1,7 @@
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 
-bool RiscVM::Assembler::ParsePseudoLI(
-    const std::string& name,
-    std::vector<OperandPtr>& operands) const
+bool RiscVM::Assembler::ParsePseudoLI(const std::string& name, std::vector<OperandPtr>& operands) const
 {
     // load immediate: li rd,imm
     // lui  rd,imm[31:12]+imm[11]

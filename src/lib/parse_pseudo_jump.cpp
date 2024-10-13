@@ -1,9 +1,7 @@
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 
-bool RiscVM::Assembler::ParsePseudoJump(
-    const std::string& name,
-    std::vector<OperandPtr>& operands) const
+bool RiscVM::Assembler::ParsePseudoJump(const std::string& name, std::vector<OperandPtr>& operands) const
 {
     // jump: j sym
     // jal zero,sym

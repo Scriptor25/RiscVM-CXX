@@ -1,9 +1,7 @@
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Operand.hpp>
 
-bool RiscVM::Assembler::ParsePseudoLA(
-    const std::string& name,
-    std::vector<OperandPtr>& operands) const
+bool RiscVM::Assembler::ParsePseudoLA(const std::string& name, std::vector<OperandPtr>& operands) const
 {
     // load address: la rd,sym
     // auipc rd,(sym-pc)[31:12]+(sym-pc)[11]
