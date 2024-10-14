@@ -31,17 +31,14 @@ _start:
 
     addi t0,zero,1
     beq  a0,t0,.loose
-
 .win:
     la   a0,msg_win
     call puts
     j    .end
-
 .loose:
     la   a0,msg_loose
     call puts
-
-.end: j .
+.end:
     addi a0,zero,0
     call exit
 
