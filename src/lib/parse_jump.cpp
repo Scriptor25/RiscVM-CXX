@@ -12,7 +12,7 @@ bool RiscVM::Assembler::ParseJump(const std::string& name, std::vector<OperandPt
         operands.clear();
         operands.push_back(Reg(zero));
         operands.push_back(sym);
-        m_ActiveSection->EmplaceBack(RV32IM_JAL, operands);
+        m_ActiveSection->EmplaceBack(RV32I_JAL, operands);
 
         return true;
     }
@@ -26,7 +26,7 @@ bool RiscVM::Assembler::ParseJump(const std::string& name, std::vector<OperandPt
         operands.clear();
         operands.push_back(Reg(ra));
         operands.push_back(sym);
-        m_ActiveSection->EmplaceBack(RV32IM_JAL, operands);
+        m_ActiveSection->EmplaceBack(RV32I_JAL, operands);
 
         return true;
     }
@@ -40,7 +40,7 @@ bool RiscVM::Assembler::ParseJump(const std::string& name, std::vector<OperandPt
         operands.clear();
         operands.push_back(Reg(zero));
         operands.push_back(Off(Imm(0), rs1));
-        m_ActiveSection->EmplaceBack(RV32IM_JALR, operands);
+        m_ActiveSection->EmplaceBack(RV32I_JALR, operands);
 
         return true;
     }
@@ -54,7 +54,7 @@ bool RiscVM::Assembler::ParseJump(const std::string& name, std::vector<OperandPt
         operands.clear();
         operands.push_back(Reg(ra));
         operands.push_back(Off(Imm(0), rs1));
-        m_ActiveSection->EmplaceBack(RV32IM_JALR, operands);
+        m_ActiveSection->EmplaceBack(RV32I_JALR, operands);
 
         return true;
     }

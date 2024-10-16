@@ -9,7 +9,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
     {
         operands.push_back(Reg(zero));
         operands.push_back(Off(Imm(0), Reg(ra)));
-        m_ActiveSection->EmplaceBack(RV32IM_JALR, operands);
+        m_ActiveSection->EmplaceBack(RV32I_JALR, operands);
 
         return true;
     }
@@ -24,12 +24,12 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.clear();
         operands.push_back(Reg(ra));
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        m_ActiveSection->EmplaceBack(RV32IM_AUIPC, operands);
+        m_ActiveSection->EmplaceBack(RV32I_AUIPC, operands);
 
         operands.clear();
         operands.push_back(Reg(ra));
         operands.push_back(Off(Bits(sym, 11, 0, true), Reg(ra)));
-        m_ActiveSection->EmplaceBack(RV32IM_JALR, operands);
+        m_ActiveSection->EmplaceBack(RV32I_JALR, operands);
 
         return true;
     }
@@ -44,12 +44,12 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.clear();
         operands.push_back(Reg(t1));
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        m_ActiveSection->EmplaceBack(RV32IM_AUIPC, operands);
+        m_ActiveSection->EmplaceBack(RV32I_AUIPC, operands);
 
         operands.clear();
         operands.push_back(Reg(zero));
         operands.push_back(Off(Bits(sym, 11, 0, true), Reg(t1)));
-        m_ActiveSection->EmplaceBack(RV32IM_JALR, operands);
+        m_ActiveSection->EmplaceBack(RV32I_JALR, operands);
 
         return true;
     }
@@ -66,7 +66,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.push_back(Reg(sp));
         operands.push_back(Reg(sp));
         operands.push_back(Imm(-4 * n));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
 
         for (int32_t i = 0; i < regs.size(); ++i)
         {
@@ -75,7 +75,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
             operands.clear();
             operands.push_back(rs);
             operands.push_back(Off(Imm(4 * (n - i - 1)), Reg(sp)));
-            m_ActiveSection->EmplaceBack(RV32IM_SW, operands);
+            m_ActiveSection->EmplaceBack(RV32I_SW, operands);
         }
 
         return true;
@@ -93,7 +93,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.push_back(Reg(sp));
         operands.push_back(Reg(sp));
         operands.push_back(Imm(-2 * n));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
 
         for (int32_t i = 0; i < regs.size(); ++i)
         {
@@ -102,7 +102,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
             operands.clear();
             operands.push_back(rs);
             operands.push_back(Off(Imm(2 * (n - i - 1)), Reg(sp)));
-            m_ActiveSection->EmplaceBack(RV32IM_SH, operands);
+            m_ActiveSection->EmplaceBack(RV32I_SH, operands);
         }
 
         return true;
@@ -120,7 +120,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.push_back(Reg(sp));
         operands.push_back(Reg(sp));
         operands.push_back(Imm(-n));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
 
         for (int32_t i = 0; i < regs.size(); ++i)
         {
@@ -129,7 +129,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
             operands.clear();
             operands.push_back(rs);
             operands.push_back(Off(Imm(n - i - 1), Reg(sp)));
-            m_ActiveSection->EmplaceBack(RV32IM_SB, operands);
+            m_ActiveSection->EmplaceBack(RV32I_SB, operands);
         }
 
         return true;
@@ -147,7 +147,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.push_back(Reg(sp));
         operands.push_back(Reg(sp));
         operands.push_back(Imm(4 * n));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
 
         for (int32_t i = 0; i < regs.size(); ++i)
         {
@@ -156,7 +156,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
             operands.clear();
             operands.push_back(rd);
             operands.push_back(Off(Imm(-4 * (n - i)), Reg(sp)));
-            m_ActiveSection->EmplaceBack(RV32IM_LW, operands);
+            m_ActiveSection->EmplaceBack(RV32I_LW, operands);
         }
 
         return true;
@@ -174,7 +174,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.push_back(Reg(sp));
         operands.push_back(Reg(sp));
         operands.push_back(Imm(2 * n));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
 
         for (int32_t i = 0; i < regs.size(); ++i)
         {
@@ -183,7 +183,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
             operands.clear();
             operands.push_back(rd);
             operands.push_back(Off(Imm(-2 * (n - i)), Reg(sp)));
-            m_ActiveSection->EmplaceBack(RV32IM_LH, operands);
+            m_ActiveSection->EmplaceBack(RV32I_LH, operands);
         }
 
         return true;
@@ -201,7 +201,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.push_back(Reg(sp));
         operands.push_back(Reg(sp));
         operands.push_back(Imm(2 * n));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
 
         for (int32_t i = 0; i < regs.size(); ++i)
         {
@@ -210,7 +210,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
             operands.clear();
             operands.push_back(rd);
             operands.push_back(Off(Imm(-2 * (n - i)), Reg(sp)));
-            m_ActiveSection->EmplaceBack(RV32IM_LHU, operands);
+            m_ActiveSection->EmplaceBack(RV32I_LHU, operands);
         }
 
         return true;
@@ -228,7 +228,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.push_back(Reg(sp));
         operands.push_back(Reg(sp));
         operands.push_back(Imm(n));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
 
         for (int32_t i = 0; i < regs.size(); ++i)
         {
@@ -237,7 +237,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
             operands.clear();
             operands.push_back(rd);
             operands.push_back(Off(Imm(-(n - i)), Reg(sp)));
-            m_ActiveSection->EmplaceBack(RV32IM_LB, operands);
+            m_ActiveSection->EmplaceBack(RV32I_LB, operands);
         }
 
         return true;
@@ -255,7 +255,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
         operands.push_back(Reg(sp));
         operands.push_back(Reg(sp));
         operands.push_back(Imm(n));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
 
         for (int32_t i = 0; i < regs.size(); ++i)
         {
@@ -264,7 +264,7 @@ bool RiscVM::Assembler::ParseCall(const std::string& name, std::vector<OperandPt
             operands.clear();
             operands.push_back(rd);
             operands.push_back(Off(Imm(-(n - i)), Reg(sp)));
-            m_ActiveSection->EmplaceBack(RV32IM_LBU, operands);
+            m_ActiveSection->EmplaceBack(RV32I_LBU, operands);
         }
 
         return true;

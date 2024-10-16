@@ -16,7 +16,7 @@ void RiscVM::Assembler::ParseInstruction()
     if (ParsePseudo(name, operands))
         return;
 
-    const auto rv = GetInstruction(name);
+    const auto rv = ISA(name);
     if (!rv)
         throw std::runtime_error("no such instruction");
 

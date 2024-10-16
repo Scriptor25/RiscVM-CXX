@@ -257,42 +257,42 @@ static std::unordered_map<RiscVM::Register, const char*> register_to_string
     {RiscVM::t4, "t4"}, {RiscVM::t5, "t5"}, {RiscVM::t6, "t6"},
 };
 
-static std::unordered_map<std::string, RiscVM::RV32IM> string_to_instruction
+static std::unordered_map<std::string, uint32_t> string_to_isa
 {
-    {"lui", RiscVM::RV32IM_LUI}, {"auipc", RiscVM::RV32IM_AUIPC}, {"jal", RiscVM::RV32IM_JAL},
-    {"jalr", RiscVM::RV32IM_JALR}, {"beq", RiscVM::RV32IM_BEQ}, {"bne", RiscVM::RV32IM_BNE},
-    {"blt", RiscVM::RV32IM_BLT}, {"bge", RiscVM::RV32IM_BGE}, {"bltu", RiscVM::RV32IM_BLTU},
-    {"bgeu", RiscVM::RV32IM_BGEU}, {"lb", RiscVM::RV32IM_LB}, {"lh", RiscVM::RV32IM_LH}, {"lw", RiscVM::RV32IM_LW},
-    {"lbu", RiscVM::RV32IM_LBU}, {"lhu", RiscVM::RV32IM_LHU}, {"sb", RiscVM::RV32IM_SB}, {"sh", RiscVM::RV32IM_SH},
-    {"sw", RiscVM::RV32IM_SW}, {"addi", RiscVM::RV32IM_ADDI}, {"slti", RiscVM::RV32IM_SLTI},
-    {"sltiu", RiscVM::RV32IM_SLTIU}, {"xori", RiscVM::RV32IM_XORI}, {"ori", RiscVM::RV32IM_ORI},
-    {"andi", RiscVM::RV32IM_ANDI}, {"slli", RiscVM::RV32IM_SLLI}, {"srli", RiscVM::RV32IM_SRLI},
-    {"srai", RiscVM::RV32IM_SRAI}, {"add", RiscVM::RV32IM_ADD}, {"sub", RiscVM::RV32IM_SUB},
-    {"sll", RiscVM::RV32IM_SLL}, {"slt", RiscVM::RV32IM_SLT}, {"sltu", RiscVM::RV32IM_SLTU},
-    {"xor", RiscVM::RV32IM_XOR}, {"srl", RiscVM::RV32IM_SRL}, {"sra", RiscVM::RV32IM_SRA}, {"or", RiscVM::RV32IM_OR},
-    {"and", RiscVM::RV32IM_AND}, {"fence", RiscVM::RV32IM_FENCE}, {"ecall", RiscVM::RV32IM_ECALL},
-    {"ebreak", RiscVM::RV32IM_EBREAK}, {"mul", RiscVM::RV32IM_MUL}, {"mulh", RiscVM::RV32IM_MULH},
-    {"mulhsu", RiscVM::RV32IM_MULHSU}, {"mulhu", RiscVM::RV32IM_MULHU}, {"div", RiscVM::RV32IM_DIV},
-    {"divu", RiscVM::RV32IM_DIVU}, {"rem", RiscVM::RV32IM_REM}, {"remu", RiscVM::RV32IM_REMU},
+    {"lui", RiscVM::RV32I_LUI}, {"auipc", RiscVM::RV32I_AUIPC}, {"jal", RiscVM::RV32I_JAL},
+    {"jalr", RiscVM::RV32I_JALR}, {"beq", RiscVM::RV32I_BEQ}, {"bne", RiscVM::RV32I_BNE},
+    {"blt", RiscVM::RV32I_BLT}, {"bge", RiscVM::RV32I_BGE}, {"bltu", RiscVM::RV32I_BLTU},
+    {"bgeu", RiscVM::RV32I_BGEU}, {"lb", RiscVM::RV32I_LB}, {"lh", RiscVM::RV32I_LH}, {"lw", RiscVM::RV32I_LW},
+    {"lbu", RiscVM::RV32I_LBU}, {"lhu", RiscVM::RV32I_LHU}, {"sb", RiscVM::RV32I_SB}, {"sh", RiscVM::RV32I_SH},
+    {"sw", RiscVM::RV32I_SW}, {"addi", RiscVM::RV32I_ADDI}, {"slti", RiscVM::RV32I_SLTI},
+    {"sltiu", RiscVM::RV32I_SLTIU}, {"xori", RiscVM::RV32I_XORI}, {"ori", RiscVM::RV32I_ORI},
+    {"andi", RiscVM::RV32I_ANDI}, {"slli", RiscVM::RV32I_SLLI}, {"srli", RiscVM::RV32I_SRLI},
+    {"srai", RiscVM::RV32I_SRAI}, {"add", RiscVM::RV32I_ADD}, {"sub", RiscVM::RV32I_SUB},
+    {"sll", RiscVM::RV32I_SLL}, {"slt", RiscVM::RV32I_SLT}, {"sltu", RiscVM::RV32I_SLTU},
+    {"xor", RiscVM::RV32I_XOR}, {"srl", RiscVM::RV32I_SRL}, {"sra", RiscVM::RV32I_SRA}, {"or", RiscVM::RV32I_OR},
+    {"and", RiscVM::RV32I_AND}, {"fence", RiscVM::RV32I_FENCE}, {"ecall", RiscVM::RV32I_ECALL},
+    {"ebreak", RiscVM::RV32I_EBREAK}, {"mul", RiscVM::RV32M_MUL}, {"mulh", RiscVM::RV32M_MULH},
+    {"mulhsu", RiscVM::RV32M_MULHSU}, {"mulhu", RiscVM::RV32M_MULHU}, {"div", RiscVM::RV32M_DIV},
+    {"divu", RiscVM::RV32M_DIVU}, {"rem", RiscVM::RV32M_REM}, {"remu", RiscVM::RV32M_REMU},
 };
 
-static std::unordered_map<RiscVM::RV32IM, const char*> instruction_to_string
+static std::unordered_map<uint32_t, const char*> isa_to_string
 {
-    {RiscVM::RV32IM_LUI, "lui"}, {RiscVM::RV32IM_AUIPC, "auipc"}, {RiscVM::RV32IM_JAL, "jal"},
-    {RiscVM::RV32IM_JALR, "jalr"}, {RiscVM::RV32IM_BEQ, "beq"}, {RiscVM::RV32IM_BNE, "bne"},
-    {RiscVM::RV32IM_BLT, "blt"}, {RiscVM::RV32IM_BGE, "bge"}, {RiscVM::RV32IM_BLTU, "bltu"},
-    {RiscVM::RV32IM_BGEU, "bgeu"}, {RiscVM::RV32IM_LB, "lb"}, {RiscVM::RV32IM_LH, "lh"}, {RiscVM::RV32IM_LW, "lw"},
-    {RiscVM::RV32IM_LBU, "lbu"}, {RiscVM::RV32IM_LHU, "lhu"}, {RiscVM::RV32IM_SB, "sb"}, {RiscVM::RV32IM_SH, "sh"},
-    {RiscVM::RV32IM_SW, "sw"}, {RiscVM::RV32IM_ADDI, "addi"}, {RiscVM::RV32IM_SLTI, "slti"},
-    {RiscVM::RV32IM_SLTIU, "sltiu"}, {RiscVM::RV32IM_XORI, "xori"}, {RiscVM::RV32IM_ORI, "ori"},
-    {RiscVM::RV32IM_ANDI, "andi"}, {RiscVM::RV32IM_SLLI, "slli"}, {RiscVM::RV32IM_SRLI, "srli"},
-    {RiscVM::RV32IM_SRAI, "srai"}, {RiscVM::RV32IM_ADD, "add"}, {RiscVM::RV32IM_SUB, "sub"},
-    {RiscVM::RV32IM_SLL, "sll"}, {RiscVM::RV32IM_SLT, "slt"}, {RiscVM::RV32IM_SLTU, "sltu"},
-    {RiscVM::RV32IM_XOR, "xor"}, {RiscVM::RV32IM_SRL, "srl"}, {RiscVM::RV32IM_SRA, "sra"}, {RiscVM::RV32IM_OR, "or"},
-    {RiscVM::RV32IM_AND, "and"}, {RiscVM::RV32IM_FENCE, "fence"}, {RiscVM::RV32IM_ECALL, "ecall"},
-    {RiscVM::RV32IM_EBREAK, "ebreak"}, {RiscVM::RV32IM_MUL, "mul"}, {RiscVM::RV32IM_MULH, "mulh"},
-    {RiscVM::RV32IM_MULHSU, "mulhsu"}, {RiscVM::RV32IM_MULHU, "mulhu"}, {RiscVM::RV32IM_DIV, "div"},
-    {RiscVM::RV32IM_DIVU, "divu"}, {RiscVM::RV32IM_REM, "rem"}, {RiscVM::RV32IM_REMU, "remu"},
+    {RiscVM::RV32I_LUI, "lui"}, {RiscVM::RV32I_AUIPC, "auipc"}, {RiscVM::RV32I_JAL, "jal"},
+    {RiscVM::RV32I_JALR, "jalr"}, {RiscVM::RV32I_BEQ, "beq"}, {RiscVM::RV32I_BNE, "bne"},
+    {RiscVM::RV32I_BLT, "blt"}, {RiscVM::RV32I_BGE, "bge"}, {RiscVM::RV32I_BLTU, "bltu"},
+    {RiscVM::RV32I_BGEU, "bgeu"}, {RiscVM::RV32I_LB, "lb"}, {RiscVM::RV32I_LH, "lh"}, {RiscVM::RV32I_LW, "lw"},
+    {RiscVM::RV32I_LBU, "lbu"}, {RiscVM::RV32I_LHU, "lhu"}, {RiscVM::RV32I_SB, "sb"}, {RiscVM::RV32I_SH, "sh"},
+    {RiscVM::RV32I_SW, "sw"}, {RiscVM::RV32I_ADDI, "addi"}, {RiscVM::RV32I_SLTI, "slti"},
+    {RiscVM::RV32I_SLTIU, "sltiu"}, {RiscVM::RV32I_XORI, "xori"}, {RiscVM::RV32I_ORI, "ori"},
+    {RiscVM::RV32I_ANDI, "andi"}, {RiscVM::RV32I_SLLI, "slli"}, {RiscVM::RV32I_SRLI, "srli"},
+    {RiscVM::RV32I_SRAI, "srai"}, {RiscVM::RV32I_ADD, "add"}, {RiscVM::RV32I_SUB, "sub"},
+    {RiscVM::RV32I_SLL, "sll"}, {RiscVM::RV32I_SLT, "slt"}, {RiscVM::RV32I_SLTU, "sltu"},
+    {RiscVM::RV32I_XOR, "xor"}, {RiscVM::RV32I_SRL, "srl"}, {RiscVM::RV32I_SRA, "sra"}, {RiscVM::RV32I_OR, "or"},
+    {RiscVM::RV32I_AND, "and"}, {RiscVM::RV32I_FENCE, "fence"}, {RiscVM::RV32I_ECALL, "ecall"},
+    {RiscVM::RV32I_EBREAK, "ebreak"}, {RiscVM::RV32M_MUL, "mul"}, {RiscVM::RV32M_MULH, "mulh"},
+    {RiscVM::RV32M_MULHSU, "mulhsu"}, {RiscVM::RV32M_MULHU, "mulhu"}, {RiscVM::RV32M_DIV, "div"},
+    {RiscVM::RV32M_DIVU, "divu"}, {RiscVM::RV32M_REM, "rem"}, {RiscVM::RV32M_REMU, "remu"},
 };
 
 const char* RiscVM::RegisterName(const uint32_t reg)
@@ -317,71 +317,33 @@ RiscVM::Register RiscVM::GetRegister(const std::string& name)
 
 const char* RiscVM::InstructionName(const uint32_t data)
 {
-    RV32IM rv;
-    switch (data & 0b1111111)
-    {
-    case RV32_64G_OP:
-        {
-            const Format::R f{.Data = data};
-            rv = static_cast<RV32IM>(f.Func7 << 10 | f.Func3 << 7 | f.Opcode);
-        }
-        break;
-    case RV32_64G_OP_IMM:
-    case RV32_64G_JALR:
-    case RV32_64G_LOAD:
-    case RV32_64G_MISC_MEM:
-    case RV32_64G_SYSTEM:
-        {
-            const Format::I f{.Data = data};
-            rv = static_cast<RV32IM>(f.Func3 << 7 | f.Opcode);
-        }
-        break;
-    case RV32_64G_STORE:
-    case RV32_64G_BRANCH:
-        {
-            const Format::S f{.Data = data};
-            rv = static_cast<RV32IM>(f.Func3 << 7 | f.Opcode);
-        }
-        break;
-    case RV32_64G_LUI:
-    case RV32_64G_AUIPC:
-    case RV32_64G_JAL:
-        {
-            const Format::U f{.Data = data};
-            rv = static_cast<RV32IM>(f.Opcode);
-        }
-        break;
-    default:
-        return nullptr;
-    }
-
-    return InstructionName(rv);
+    return ISAName(ISA(data));
 }
 
-const char* RiscVM::InstructionName(const RV32IM instruction)
+const char* RiscVM::ISAName(const uint32_t isa)
 {
-    return instruction_to_string[instruction];
+    return isa_to_string[isa];
 }
 
 bool RiscVM::IsInstruction(const std::string& name)
 {
-    return string_to_instruction.contains(name);
+    return string_to_isa.contains(name);
 }
 
-RiscVM::RV32IM RiscVM::GetInstruction(const std::string& name)
+uint32_t RiscVM::ISA(const std::string& name)
 {
-    return string_to_instruction[name];
+    return string_to_isa[name];
 }
 
-RiscVM::RV32IM RiscVM::GetInstruction(const uint32_t data)
+uint32_t RiscVM::ISA(const uint32_t data)
 {
-    auto rv = static_cast<RV32IM>(0);
+    uint32_t rv = 0;
     switch (data & 0b1111111)
     {
     case RV32_64G_OP:
         {
             const Format::R f{.Data = data};
-            rv = static_cast<RV32IM>(f.Func7 << 10 | f.Func3 << 7 | f.Opcode);
+            rv = f.Func7 << 10 | f.Func3 << 7 | f.Opcode;
         }
         break;
     case RV32_64G_OP_IMM:
@@ -391,14 +353,14 @@ RiscVM::RV32IM RiscVM::GetInstruction(const uint32_t data)
     case RV32_64G_SYSTEM:
         {
             const Format::I f{.Data = data};
-            rv = static_cast<RV32IM>(f.Func3 << 7 | f.Opcode);
+            rv = f.Func3 << 7 | f.Opcode;
         }
         break;
     case RV32_64G_STORE:
     case RV32_64G_BRANCH:
         {
             const Format::S f{.Data = data};
-            rv = static_cast<RV32IM>(f.Func3 << 7 | f.Opcode);
+            rv = f.Func3 << 7 | f.Opcode;
         }
         break;
     case RV32_64G_LUI:
@@ -406,7 +368,7 @@ RiscVM::RV32IM RiscVM::GetInstruction(const uint32_t data)
     case RV32_64G_JAL:
         {
             const Format::U f{.Data = data};
-            rv = static_cast<RV32IM>(f.Opcode);
+            rv = f.Opcode;
         }
         break;
     default:

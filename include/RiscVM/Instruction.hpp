@@ -9,7 +9,7 @@ namespace RiscVM
     struct Instruction
     {
         uint32_t Offset;
-        RV32IM RV;
+        uint32_t RV;
         std::vector<OperandPtr> Operands;
     };
 }

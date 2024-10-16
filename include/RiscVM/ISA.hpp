@@ -37,57 +37,60 @@ namespace RiscVM
         RV32_64G_CUSTOM_3 = 0b1111011,
     };
 
-    enum RV32IM
+    enum RV32I
     {
-        RV32IM_LUI = RV32_64G_LUI,
-        RV32IM_AUIPC = RV32_64G_AUIPC,
-        RV32IM_JAL = RV32_64G_JAL,
-        RV32IM_JALR = RV32_64G_JALR,
-        RV32IM_BEQ = RV32_64G_BRANCH,
-        RV32IM_BNE = 0b001 << 7 | RV32_64G_BRANCH,
-        RV32IM_BLT = 0b100 << 7 | RV32_64G_BRANCH,
-        RV32IM_BGE = 0b101 << 7 | RV32_64G_BRANCH,
-        RV32IM_BLTU = 0b110 << 7 | RV32_64G_BRANCH,
-        RV32IM_BGEU = 0b111 << 7 | RV32_64G_BRANCH,
-        RV32IM_LB = RV32_64G_LOAD,
-        RV32IM_LH = 0b001 << 7 | RV32_64G_LOAD,
-        RV32IM_LW = 0b010 << 7 | RV32_64G_LOAD,
-        RV32IM_LBU = 0b100 << 7 | RV32_64G_LOAD,
-        RV32IM_LHU = 0b101 << 7 | RV32_64G_LOAD,
-        RV32IM_SB = RV32_64G_STORE,
-        RV32IM_SH = 0b001 << 7 | RV32_64G_STORE,
-        RV32IM_SW = 0b010 << 7 | RV32_64G_STORE,
-        RV32IM_ADDI = RV32_64G_OP_IMM,
-        RV32IM_SLTI = 0b010 << 7 | RV32_64G_OP_IMM,
-        RV32IM_SLTIU = 0b011 << 7 | RV32_64G_OP_IMM,
-        RV32IM_XORI = 0b100 << 7 | RV32_64G_OP_IMM,
-        RV32IM_ORI = 0b110 << 7 | RV32_64G_OP_IMM,
-        RV32IM_ANDI = 0b111 << 7 | RV32_64G_OP_IMM,
-        RV32IM_SLLI = 0b001 << 7 | RV32_64G_OP_IMM,
-        RV32IM_SRLI = 0b101 << 7 | RV32_64G_OP_IMM,
-        RV32IM_SRAI = 0b0100000 << 10 | 0b101 << 7 | RV32_64G_OP_IMM,
-        RV32IM_ADD = RV32_64G_OP,
-        RV32IM_SUB = 0b0100000 << 10 | RV32_64G_OP,
-        RV32IM_SLL = 0b001 << 7 | RV32_64G_OP,
-        RV32IM_SLT = 0b010 << 7 | RV32_64G_OP,
-        RV32IM_SLTU = 0b011 << 7 | RV32_64G_OP,
-        RV32IM_XOR = 0b100 << 7 | RV32_64G_OP,
-        RV32IM_SRL = 0b101 << 7 | RV32_64G_OP,
-        RV32IM_SRA = 0b0100000 << 10 | 0b101 << 7 | RV32_64G_OP,
-        RV32IM_OR = 0b110 << 7 | RV32_64G_OP,
-        RV32IM_AND = 0b111 << 7 | RV32_64G_OP,
-        RV32IM_FENCE = RV32_64G_MISC_MEM,
-        RV32IM_ECALL = RV32_64G_SYSTEM,
-        RV32IM_EBREAK = 0b1 << 20 | RV32_64G_SYSTEM,
+        RV32I_LUI = RV32_64G_LUI,
+        RV32I_AUIPC = RV32_64G_AUIPC,
+        RV32I_JAL = RV32_64G_JAL,
+        RV32I_JALR = RV32_64G_JALR,
+        RV32I_BEQ = RV32_64G_BRANCH,
+        RV32I_BNE = 0b001 << 7 | RV32_64G_BRANCH,
+        RV32I_BLT = 0b100 << 7 | RV32_64G_BRANCH,
+        RV32I_BGE = 0b101 << 7 | RV32_64G_BRANCH,
+        RV32I_BLTU = 0b110 << 7 | RV32_64G_BRANCH,
+        RV32I_BGEU = 0b111 << 7 | RV32_64G_BRANCH,
+        RV32I_LB = RV32_64G_LOAD,
+        RV32I_LH = 0b001 << 7 | RV32_64G_LOAD,
+        RV32I_LW = 0b010 << 7 | RV32_64G_LOAD,
+        RV32I_LBU = 0b100 << 7 | RV32_64G_LOAD,
+        RV32I_LHU = 0b101 << 7 | RV32_64G_LOAD,
+        RV32I_SB = RV32_64G_STORE,
+        RV32I_SH = 0b001 << 7 | RV32_64G_STORE,
+        RV32I_SW = 0b010 << 7 | RV32_64G_STORE,
+        RV32I_ADDI = RV32_64G_OP_IMM,
+        RV32I_SLTI = 0b010 << 7 | RV32_64G_OP_IMM,
+        RV32I_SLTIU = 0b011 << 7 | RV32_64G_OP_IMM,
+        RV32I_XORI = 0b100 << 7 | RV32_64G_OP_IMM,
+        RV32I_ORI = 0b110 << 7 | RV32_64G_OP_IMM,
+        RV32I_ANDI = 0b111 << 7 | RV32_64G_OP_IMM,
+        RV32I_SLLI = 0b001 << 7 | RV32_64G_OP_IMM,
+        RV32I_SRLI = 0b101 << 7 | RV32_64G_OP_IMM,
+        RV32I_SRAI = 0b0100000 << 10 | 0b101 << 7 | RV32_64G_OP_IMM,
+        RV32I_ADD = RV32_64G_OP,
+        RV32I_SUB = 0b0100000 << 10 | RV32_64G_OP,
+        RV32I_SLL = 0b001 << 7 | RV32_64G_OP,
+        RV32I_SLT = 0b010 << 7 | RV32_64G_OP,
+        RV32I_SLTU = 0b011 << 7 | RV32_64G_OP,
+        RV32I_XOR = 0b100 << 7 | RV32_64G_OP,
+        RV32I_SRL = 0b101 << 7 | RV32_64G_OP,
+        RV32I_SRA = 0b0100000 << 10 | 0b101 << 7 | RV32_64G_OP,
+        RV32I_OR = 0b110 << 7 | RV32_64G_OP,
+        RV32I_AND = 0b111 << 7 | RV32_64G_OP,
+        RV32I_FENCE = RV32_64G_MISC_MEM,
+        RV32I_ECALL = RV32_64G_SYSTEM,
+        RV32I_EBREAK = 0b1 << 20 | RV32_64G_SYSTEM,
+    };
 
-        RV32IM_MUL = 0b0000001 << 10 | 0b000 << 7 | RV32_64G_OP,
-        RV32IM_MULH = 0b0000001 << 10 | 0b001 << 7 | RV32_64G_OP,
-        RV32IM_MULHSU = 0b0000001 << 10 | 0b010 << 7 | RV32_64G_OP,
-        RV32IM_MULHU = 0b0000001 << 10 | 0b011 << 7 | RV32_64G_OP,
-        RV32IM_DIV = 0b0000001 << 10 | 0b100 << 7 | RV32_64G_OP,
-        RV32IM_DIVU = 0b0000001 << 10 | 0b101 << 7 | RV32_64G_OP,
-        RV32IM_REM = 0b0000001 << 10 | 0b110 << 7 | RV32_64G_OP,
-        RV32IM_REMU = 0b0000001 << 10 | 0b111 << 7 | RV32_64G_OP,
+    enum RV32M
+    {
+        RV32M_MUL = 0b0000001 << 10 | 0b000 << 7 | RV32_64G_OP,
+        RV32M_MULH = 0b0000001 << 10 | 0b001 << 7 | RV32_64G_OP,
+        RV32M_MULHSU = 0b0000001 << 10 | 0b010 << 7 | RV32_64G_OP,
+        RV32M_MULHU = 0b0000001 << 10 | 0b011 << 7 | RV32_64G_OP,
+        RV32M_DIV = 0b0000001 << 10 | 0b100 << 7 | RV32_64G_OP,
+        RV32M_DIVU = 0b0000001 << 10 | 0b101 << 7 | RV32_64G_OP,
+        RV32M_REM = 0b0000001 << 10 | 0b110 << 7 | RV32_64G_OP,
+        RV32M_REMU = 0b0000001 << 10 | 0b111 << 7 | RV32_64G_OP,
     };
 
     enum Register
@@ -249,8 +252,8 @@ namespace RiscVM
     Register GetRegister(const std::string&);
 
     const char* InstructionName(uint32_t);
-    const char* InstructionName(RV32IM);
+    const char* ISAName(uint32_t);
     bool IsInstruction(const std::string&);
-    RV32IM GetInstruction(const std::string&);
-    RV32IM GetInstruction(uint32_t);
+    uint32_t ISA(const std::string&);
+    uint32_t ISA(uint32_t);
 }

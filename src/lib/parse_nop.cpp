@@ -10,7 +10,7 @@ bool RiscVM::Assembler::ParseNoOp(const std::string& name, std::vector<OperandPt
         operands.push_back(Reg(zero));
         operands.push_back(Reg(zero));
         operands.push_back(Imm(0));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
         return true;
     }
 

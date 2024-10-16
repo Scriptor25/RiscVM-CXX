@@ -31,27 +31,27 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
         for (auto& [i_offset_, i_rv_, i_operands_] : instructions_)
         {
             const auto ptr = reinterpret_cast<uint32_t*>(dest.data() + offset_ + i_offset_);
-            const auto i = static_cast<uint32_t>(i_rv_);
+            const auto i = i_rv_;
             switch (i_rv_)
             {
-            case RV32IM_ADD:
-            case RV32IM_SUB:
-            case RV32IM_SLL:
-            case RV32IM_SLT:
-            case RV32IM_SLTU:
-            case RV32IM_XOR:
-            case RV32IM_SRL:
-            case RV32IM_SRA:
-            case RV32IM_OR:
-            case RV32IM_AND:
-            case RV32IM_MUL:
-            case RV32IM_MULH:
-            case RV32IM_MULHSU:
-            case RV32IM_MULHU:
-            case RV32IM_DIV:
-            case RV32IM_DIVU:
-            case RV32IM_REM:
-            case RV32IM_REMU:
+            case RV32I_ADD:
+            case RV32I_SUB:
+            case RV32I_SLL:
+            case RV32I_SLT:
+            case RV32I_SLTU:
+            case RV32I_XOR:
+            case RV32I_SRL:
+            case RV32I_SRA:
+            case RV32I_OR:
+            case RV32I_AND:
+            case RV32M_MUL:
+            case RV32M_MULH:
+            case RV32M_MULHSU:
+            case RV32M_MULHU:
+            case RV32M_DIV:
+            case RV32M_DIVU:
+            case RV32M_REM:
+            case RV32M_REMU:
                 {
                     const Format::R x
                     {
@@ -66,7 +66,7 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
                 }
                 break; // R
 
-            case RV32IM_JALR:
+            case RV32I_JALR:
                 {
                     const auto o = std::dynamic_pointer_cast<OffsetOperand>(i_operands_[1]);
                     Format::I x
@@ -81,8 +81,8 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
                 }
                 break; // JALR
 
-            case RV32IM_ECALL:
-            case RV32IM_EBREAK:
+            case RV32I_ECALL:
+            case RV32I_EBREAK:
                 {
                     const Format::I x
                     {
@@ -93,11 +93,11 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
                 }
                 break; // ENV
 
-            case RV32IM_LB:
-            case RV32IM_LH:
-            case RV32IM_LW:
-            case RV32IM_LBU:
-            case RV32IM_LHU:
+            case RV32I_LB:
+            case RV32I_LH:
+            case RV32I_LW:
+            case RV32I_LBU:
+            case RV32I_LHU:
                 {
                     const auto o = std::dynamic_pointer_cast<OffsetOperand>(i_operands_[1]);
                     Format::I x
@@ -112,16 +112,16 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
                 }
                 break; // LOAD
 
-            case RV32IM_ADDI:
-            case RV32IM_SLTI:
-            case RV32IM_SLTIU:
-            case RV32IM_XORI:
-            case RV32IM_ORI:
-            case RV32IM_ANDI:
-            case RV32IM_SLLI:
-            case RV32IM_SRLI:
-            case RV32IM_SRAI:
-            case RV32IM_FENCE:
+            case RV32I_ADDI:
+            case RV32I_SLTI:
+            case RV32I_SLTIU:
+            case RV32I_XORI:
+            case RV32I_ORI:
+            case RV32I_ANDI:
+            case RV32I_SLLI:
+            case RV32I_SRLI:
+            case RV32I_SRAI:
+            case RV32I_FENCE:
                 {
                     Format::I x
                     {
@@ -135,9 +135,9 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
                 }
                 break; // I
 
-            case RV32IM_SB:
-            case RV32IM_SH:
-            case RV32IM_SW:
+            case RV32I_SB:
+            case RV32I_SH:
+            case RV32I_SW:
                 {
                     const auto o = std::dynamic_pointer_cast<OffsetOperand>(i_operands_[1]);
                     Format::S x
@@ -152,12 +152,12 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
                 }
                 break; // S
 
-            case RV32IM_BEQ:
-            case RV32IM_BNE:
-            case RV32IM_BLT:
-            case RV32IM_BGE:
-            case RV32IM_BLTU:
-            case RV32IM_BGEU:
+            case RV32I_BEQ:
+            case RV32I_BNE:
+            case RV32I_BLT:
+            case RV32I_BGE:
+            case RV32I_BLTU:
+            case RV32I_BGEU:
                 {
                     Format::B x
                     {
@@ -171,8 +171,8 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
                 }
                 break; // B
 
-            case RV32IM_LUI:
-            case RV32IM_AUIPC:
+            case RV32I_LUI:
+            case RV32I_AUIPC:
                 {
                     Format::U x
                     {
@@ -184,7 +184,7 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
                 }
                 break; // U
 
-            case RV32IM_JAL:
+            case RV32I_JAL:
                 {
                     Format::J x
                     {
@@ -195,6 +195,7 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
                     *ptr = x.Data;
                 }
                 break; // J
+            default: break;
             }
         }
     }

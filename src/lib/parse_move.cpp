@@ -8,7 +8,7 @@ bool RiscVM::Assembler::ParseMove(const std::string& name, std::vector<OperandPt
     if (name == "mv" && operands.size() == 2)
     {
         operands.push_back(Imm(0));
-        m_ActiveSection->EmplaceBack(RV32IM_ADDI, operands);
+        m_ActiveSection->EmplaceBack(RV32I_ADDI, operands);
 
         return true;
     }

@@ -15,12 +15,12 @@ bool RiscVM::Assembler::ParseStore(const std::string& name, std::vector<OperandP
         operands.clear();
         operands.push_back(rt);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        m_ActiveSection->EmplaceBack(RV32IM_AUIPC, operands);
+        m_ActiveSection->EmplaceBack(RV32I_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rs);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        m_ActiveSection->EmplaceBack(RV32IM_SB, operands);
+        m_ActiveSection->EmplaceBack(RV32I_SB, operands);
 
         return true;
     }
@@ -33,12 +33,12 @@ bool RiscVM::Assembler::ParseStore(const std::string& name, std::vector<OperandP
         operands.clear();
         operands.push_back(rt);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        m_ActiveSection->EmplaceBack(RV32IM_AUIPC, operands);
+        m_ActiveSection->EmplaceBack(RV32I_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rs);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        m_ActiveSection->EmplaceBack(RV32IM_SH, operands);
+        m_ActiveSection->EmplaceBack(RV32I_SH, operands);
 
         return true;
     }
@@ -51,12 +51,12 @@ bool RiscVM::Assembler::ParseStore(const std::string& name, std::vector<OperandP
         operands.clear();
         operands.push_back(rt);
         operands.push_back(Add(Bits(sym, 31, 12, false), Bits(sym, 11, 11, false)));
-        m_ActiveSection->EmplaceBack(RV32IM_AUIPC, operands);
+        m_ActiveSection->EmplaceBack(RV32I_AUIPC, operands);
 
         operands.clear();
         operands.push_back(rs);
         operands.push_back(Off(Bits(sym, 11, 0, true), rt));
-        m_ActiveSection->EmplaceBack(RV32IM_SW, operands);
+        m_ActiveSection->EmplaceBack(RV32I_SW, operands);
 
         return true;
     }

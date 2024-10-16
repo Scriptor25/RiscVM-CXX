@@ -71,57 +71,57 @@ std::map<int, RiscVM::ECall>& RiscVM::VM::ECallMap()
 
 void RiscVM::VM::Exec(const uint32_t data)
 {
-    switch (GetInstruction(data))
+    switch (ISA(data))
     {
-    case RV32IM_LUI: return LUI(Rd(data), ImmediateU(data));
-    case RV32IM_AUIPC: return AUIPC(Rd(data), ImmediateU(data));
-    case RV32IM_JAL: return JAL(Rd(data), ImmediateJ(data));
-    case RV32IM_JALR: return JALR(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_BEQ: return BEQ(Rs1(data), Rs2(data), ImmediateB(data));
-    case RV32IM_BNE: return BNE(Rs1(data), Rs2(data), ImmediateB(data));
-    case RV32IM_BLT: return BLT(Rs1(data), Rs2(data), ImmediateB(data));
-    case RV32IM_BGE: return BGE(Rs1(data), Rs2(data), ImmediateB(data));
-    case RV32IM_BLTU: return BLTU(Rs1(data), Rs2(data), ImmediateB(data));
-    case RV32IM_BGEU: return BGEU(Rs1(data), Rs2(data), ImmediateB(data));
-    case RV32IM_LB: return LB(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_LH: return LH(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_LW: return LW(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_LBU: return LBU(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_LHU: return LHU(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_SB: return SB(Rs1(data), Rs2(data), ImmediateS(data));
-    case RV32IM_SH: return SH(Rs1(data), Rs2(data), ImmediateS(data));
-    case RV32IM_SW: return SW(Rs1(data), Rs2(data), ImmediateS(data));
-    case RV32IM_ADDI: return ADDI(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_SLTI: return SLTI(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_SLTIU: return SLTIU(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_XORI: return XORI(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_ORI: return ORI(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_ANDI: return ANDI(Rd(data), Rs1(data), ImmediateI(data));
-    case RV32IM_SLLI: return SLLI(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_SRLI: return SRLI(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_SRAI: return SRAI(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_ADD: return ADD(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_SUB: return SUB(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_SLL: return SLL(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_SLT: return SLT(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_SLTU: return SLTU(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_XOR: return XOR(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_SRL: return SRL(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_SRA: return SRA(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_OR: return OR(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_AND: return AND(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_ECALL: return ECALL();
-    case RV32IM_EBREAK: return EBREAK();
-    case RV32IM_FENCE: return FENCE(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_LUI: return LUI(Rd(data), ImmediateU(data));
+    case RV32I_AUIPC: return AUIPC(Rd(data), ImmediateU(data));
+    case RV32I_JAL: return JAL(Rd(data), ImmediateJ(data));
+    case RV32I_JALR: return JALR(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_BEQ: return BEQ(Rs1(data), Rs2(data), ImmediateB(data));
+    case RV32I_BNE: return BNE(Rs1(data), Rs2(data), ImmediateB(data));
+    case RV32I_BLT: return BLT(Rs1(data), Rs2(data), ImmediateB(data));
+    case RV32I_BGE: return BGE(Rs1(data), Rs2(data), ImmediateB(data));
+    case RV32I_BLTU: return BLTU(Rs1(data), Rs2(data), ImmediateB(data));
+    case RV32I_BGEU: return BGEU(Rs1(data), Rs2(data), ImmediateB(data));
+    case RV32I_LB: return LB(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_LH: return LH(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_LW: return LW(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_LBU: return LBU(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_LHU: return LHU(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_SB: return SB(Rs1(data), Rs2(data), ImmediateS(data));
+    case RV32I_SH: return SH(Rs1(data), Rs2(data), ImmediateS(data));
+    case RV32I_SW: return SW(Rs1(data), Rs2(data), ImmediateS(data));
+    case RV32I_ADDI: return ADDI(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_SLTI: return SLTI(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_SLTIU: return SLTIU(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_XORI: return XORI(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_ORI: return ORI(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_ANDI: return ANDI(Rd(data), Rs1(data), ImmediateI(data));
+    case RV32I_SLLI: return SLLI(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_SRLI: return SRLI(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_SRAI: return SRAI(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_ADD: return ADD(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_SUB: return SUB(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_SLL: return SLL(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_SLT: return SLT(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_SLTU: return SLTU(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_XOR: return XOR(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_SRL: return SRL(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_SRA: return SRA(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_OR: return OR(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_AND: return AND(Rd(data), Rs1(data), Rs2(data));
+    case RV32I_ECALL: return ECALL();
+    case RV32I_EBREAK: return EBREAK();
+    case RV32I_FENCE: return FENCE(Rd(data), Rs1(data), ImmediateI(data));
 
-    case RV32IM_MUL: return MUL(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_MULH: return MULH(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_MULHSU: return MULHSU(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_MULHU: return MULHU(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_DIV: return DIV(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_DIVU: return DIVU(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_REM: return REM(Rd(data), Rs1(data), Rs2(data));
-    case RV32IM_REMU: return REMU(Rd(data), Rs1(data), Rs2(data));
+    case RV32M_MUL: return MUL(Rd(data), Rs1(data), Rs2(data));
+    case RV32M_MULH: return MULH(Rd(data), Rs1(data), Rs2(data));
+    case RV32M_MULHSU: return MULHSU(Rd(data), Rs1(data), Rs2(data));
+    case RV32M_MULHU: return MULHU(Rd(data), Rs1(data), Rs2(data));
+    case RV32M_DIV: return DIV(Rd(data), Rs1(data), Rs2(data));
+    case RV32M_DIVU: return DIVU(Rd(data), Rs1(data), Rs2(data));
+    case RV32M_REM: return REM(Rd(data), Rs1(data), Rs2(data));
+    case RV32M_REMU: return REMU(Rd(data), Rs1(data), Rs2(data));
 
     default: throw std::runtime_error("no such opcode");
     }
