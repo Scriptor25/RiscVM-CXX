@@ -7,6 +7,7 @@
 
 static int exec(const char* pgm, const size_t size)
 {
+    RiscVM::DumpRaw(pgm, size);
     RiscVM::Dump(pgm, size);
 
     RiscVM::VM vm;

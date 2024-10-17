@@ -1,7 +1,7 @@
 #include <RiscVM/ISA.hpp>
 #include <RiscVM/RiscVM.hpp>
 
-void RiscVM::Dump(const char* binary, const size_t size)
+void RiscVM::DumpRaw(const char* binary, const size_t size)
 {
     constexpr unsigned width = 16;
 
@@ -43,6 +43,11 @@ void RiscVM::Dump(const char* binary, const size_t size)
         printf("\n");
     }
 
+    fflush(stdout);
+}
+
+void RiscVM::Dump(const char* binary, const size_t size)
+{
     for (unsigned i = 0; i < size; i += 4)
     {
         const auto& data = *reinterpret_cast<const uint32_t*>(binary + i);
