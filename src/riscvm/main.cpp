@@ -122,8 +122,8 @@ int main(const int argc, const char* const* argv)
         std::cout << "TYPE" << std::endl;
         std::cout << "asm  -> source assembly file" << std::endl;
         std::cout << "bin  -> raw binary file" << std::endl;
-        std::cout << "elf  -> elf binary file" << std::endl;
-        std::cout << "coff -> coff binary file" << std::endl;
+        std::cout << "elf  -> elf executable file" << std::endl;
+        std::cout << "coff -> coff executable file" << std::endl;
         return 0;
     }
 
@@ -131,8 +131,6 @@ int main(const int argc, const char* const* argv)
         std::cout << "RiscVM (version 1.0.0)" << std::endl;
 
     std::vector<char> pgm;
-
-    // TODO: different input type: asm, bin, elf, coff, ...
     if (in_type == "asm")
     {
         RiscVM::LinkInfo link_info
@@ -153,16 +151,42 @@ int main(const int argc, const char* const* argv)
 
         if (!out_filename.empty())
         {
-            // TODO: different output type: bin, elf, coff, ...
             if (out_type == "bin")
             {
                 write_bin(out_filename, pgm.data(), pgm.size());
+            }
+            else if (out_type == "elf")
+            {
+                std::cerr << "output file format 'elf' is not YET supported" << std::endl;
+            }
+            else if (out_type == "coff")
+            {
+                std::cerr << "output file format 'coff' is not YET supported" << std::endl;
+            }
+            else
+            {
+                std::cerr << "output file format '" << out_type << "' is not supported" << std::endl;
             }
         }
     }
     else if (in_type == "bin")
     {
         pgm = read_bin(in_filename);
+    }
+    else if (in_type == "elf")
+    {
+        std::cerr << "input file format 'elf' is not YET supported" << std::endl;
+        return 1;
+    }
+    else if (in_type == "coff")
+    {
+        std::cerr << "input file format 'coff' is not YET supported" << std::endl;
+        return 1;
+    }
+    else
+    {
+        std::cerr << "input file format '" << in_type << "' is not supported" << std::endl;
+        return 1;
     }
 
     const auto status = exec(pgm.data(), pgm.size());
