@@ -2,6 +2,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <RiscVM/ArgParser.hpp>
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/VM.hpp>
 
@@ -92,43 +93,28 @@ static void write_bin(const std::string& filename, const char* data, const size_
 
 int main(const int argc, const char* const* argv)
 {
-    bool show_help = false;
-    bool show_version = false;
-    std::string in_filename;
-    std::string in_type = "asm";
-    std::string out_filename;
-    std::string out_type = "bin";
+    RiscVM::ArgParser args({
+        {"help", "print help and exit", {"-h", "--help"}},
+        {"in-type", "specify input filetype (asm, bin, elf, coff)", {"--in-type", "-it"}, false},
+        {"out-type", "specify output filetype (bin, elf, coff)", {"--out-type", "-ot"}, false},
+        {"output", "specify output filename", {"--output", "-o"}, false},
+        {"version", "print version", {"-v", "--version", "--info"}},
+    });
+    args.Parse(argc, argv);
 
-    for (unsigned i = 1; i < argc; ++i)
-    {
-        if (std::string arg = argv[i]; arg == "--help" || arg == "-h") show_help = true;
-        else if (arg == "--version" || arg == "-v") show_version = true;
-        else if (arg == "--in-type" || arg == "-it") in_type = argv[++i];
-        else if (arg == "--output" || arg == "-o") out_filename = argv[++i];
-        else if (arg == "--out-type" || arg == "-ot") out_type = argv[++i];
-        else in_filename = arg;
-    }
+    if (args.Flags["help"] || args.Flags["version"])
+        std::cout << "RiscVM (version 1.0.0)" << std::endl;
 
-    if (show_help)
+    if (args.Flags["help"])
     {
-        std::cout << "RiscVM" << std::endl;
-        std::cout << argv[0] << " <options> <filename>" << std::endl;
-        std::cout << "OPTIONS" << std::endl;
-        std::cout << "--help,     -h            -> display this text" << std::endl;
-        std::cout << "--version,  -v            -> display version info" << std::endl;
-        std::cout << "--in-type,  -it <type>    -> specify output filetype" << std::endl;
-        std::cout << "--output,   -o <filename> -> specify output filename" << std::endl;
-        std::cout << "--out-type, -ot <type>    -> specify output filetype" << std::endl;
-        std::cout << "TYPE" << std::endl;
-        std::cout << "asm  -> source assembly file" << std::endl;
-        std::cout << "bin  -> raw binary file" << std::endl;
-        std::cout << "elf  -> elf executable file" << std::endl;
-        std::cout << "coff -> coff executable file" << std::endl;
+        args.Print();
         return 0;
     }
 
-    if (show_version)
-        std::cout << "RiscVM (version 1.0.0)" << std::endl;
+    const auto& in_filename = args.Args[0];
+    const auto& in_type = args.Get("in-type", "asm");
+    const auto& out_filename = args.Get("output");
+    const auto& out_type = args.Get("out-type", "bin");
 
     std::vector<char> pgm;
     if (in_type == "asm")
