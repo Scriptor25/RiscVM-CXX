@@ -111,9 +111,9 @@ int main(const int argc, const char* const* argv)
         return 0;
     }
 
-    const auto& in_filename = args.Args[0];
-    const auto& in_type = args.Get("in-type", "asm");
+    const auto& in_filename = args.Args.empty() ? "" : args.Args[0];
     const auto& out_filename = args.Get("output");
+    const auto& in_type = args.Get("in-type", "asm");
     const auto& out_type = args.Get("out-type", "bin");
 
     std::vector<char> pgm;
@@ -129,11 +129,14 @@ int main(const int argc, const char* const* argv)
             }
         };
 
-        std::ifstream stream(in_filename);
-        if (stream.is_open())
-            pgm = RiscVM::Assembler(stream).Parse(link_info);
-        else pgm = RiscVM::Assembler(std::cin).Parse(link_info);
-        stream.close();
+        if (in_filename.empty())
+            RiscVM::Assembler::Assemble(std::cin, link_info, pgm);
+        else
+        {
+            std::ifstream stream(in_filename);
+            RiscVM::Assembler::Assemble(stream, link_info, pgm);
+            stream.close();
+        }
 
         if (!out_filename.empty())
         {

@@ -25,6 +25,11 @@ std::ostream& RiscVM::operator<<(std::ostream& os, const Token& token)
     return os << token.Type << ": '" << token.Value << "' | " << token.Immediate;
 }
 
+void RiscVM::Assembler::Assemble(std::istream& stream, LinkInfo& link_info, std::vector<char>& dest)
+{
+    return Assembler(stream).Assemble(link_info, dest);
+}
+
 RiscVM::Assembler::Assembler(std::istream& stream)
     : m_Stream(stream)
 {
@@ -34,11 +39,11 @@ RiscVM::Assembler::Assembler(std::istream& stream)
     m_ActiveSection = &m_Sections[".text"];
 }
 
-std::vector<char> RiscVM::Assembler::Parse(LinkInfo& link_info)
+void RiscVM::Assembler::Assemble(LinkInfo& link_info, std::vector<char>& dest)
 {
     while (!At(TokenType_EOF))
         ParseLine();
-    return Link(link_info);
+    Link(link_info, dest);
 }
 
 void RiscVM::Assembler::ParseLine()
