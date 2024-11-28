@@ -1,3 +1,4 @@
+#include <cstdarg>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -28,7 +29,11 @@ static int exec(const char* pgm, const size_t size)
     };
     ecall_map[2] = [](RiscVM::VM& vm_)
     {
+#ifdef _WIN32
         vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
+#else
+        vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), reinterpret_cast<va_list>(vm_.Memory() + vm_.R(RiscVM::a1)));
+#endif
         fflush(stdout);
     };
     ecall_map[3] = [](RiscVM::VM& vm_)
@@ -41,7 +46,11 @@ static int exec(const char* pgm, const size_t size)
     };
     ecall_map[5] = [](RiscVM::VM& vm_)
     {
+#ifdef _WIN32
         vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
+#else
+        vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), dynamic_cast<va_list>(vm_.Memory() + vm_.R(RiscVM::a1)));
+#endif
     };
     ecall_map[120] = [](RiscVM::VM& vm_)
     {
