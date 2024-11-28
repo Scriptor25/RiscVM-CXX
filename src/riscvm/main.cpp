@@ -32,7 +32,10 @@ static int exec(const char* pgm, const size_t size)
 #ifdef _WIN32
         vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
 #else
-        vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), reinterpret_cast<va_list>(vm_.Memory() + vm_.R(RiscVM::a1)));
+        va_list ap;
+        memcpy(&ap, vm_.Memory() + vm_.R(RiscVM::a1), sizeof(va_list));
+        vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), ap);
+        va_end(ap);
 #endif
         fflush(stdout);
     };
@@ -49,7 +52,10 @@ static int exec(const char* pgm, const size_t size)
 #ifdef _WIN32
         vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
 #else
-        vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), reinterpret_cast<va_list>(vm_.Memory() + vm_.R(RiscVM::a1)));
+        va_list ap;
+        memcpy(&ap, vm_.Memory() + vm_.R(RiscVM::a1), sizeof(va_list));
+        vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), ap);
+        va_end(ap);
 #endif
     };
     ecall_map[120] = [](RiscVM::VM& vm_)
