@@ -1,3 +1,4 @@
+#include <cstring>
 #include <ranges>
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/Instruction.hpp>
@@ -26,7 +27,7 @@ void RiscVM::Assembler::Link(LinkInfo& link_info, std::vector<char>& dest)
     for (auto& [l_name_, l_align_, l_size_, l_offset_] : link_info.Sections)
     {
         auto& [offset_, instructions_, data_] = m_Sections[l_name_];
-        if (offset_ < 0) continue;
+        if (offset_ == static_cast<uint32_t>(-1)) continue;
         memcpy(dest.data() + offset_, data_.data(), data_.size());
         for (auto& [i_offset_, i_rv_, i_operands_] : instructions_)
         {
