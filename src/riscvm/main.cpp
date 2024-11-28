@@ -49,7 +49,7 @@ static int exec(const char* pgm, const size_t size)
 #ifdef _WIN32
         vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
 #else
-        vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), dynamic_cast<va_list>(vm_.Memory() + vm_.R(RiscVM::a1)));
+        vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), reinterpret_cast<va_list>(vm_.Memory() + vm_.R(RiscVM::a1)));
 #endif
     };
     ecall_map[120] = [](RiscVM::VM& vm_)
