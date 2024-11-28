@@ -34,7 +34,8 @@ static int exec(const char* pgm, const size_t size)
         vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
 #else
         va_list ap;
-        memcpy(&ap, vm_.Memory() + vm_.R(RiscVM::a1), sizeof(va_list));
+        auto ptr = vm_.Memory() + vm_.R(RiscVM::a1);
+        memcpy(&ap, &ptr, sizeof(va_list));
         vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), ap);
         va_end(ap);
 #endif
@@ -54,7 +55,8 @@ static int exec(const char* pgm, const size_t size)
         vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
 #else
         va_list ap;
-        memcpy(&ap, vm_.Memory() + vm_.R(RiscVM::a1), sizeof(va_list));
+        auto ptr = vm_.Memory() + vm_.R(RiscVM::a1);
+        memcpy(&ap, &ptr, sizeof(va_list));
         vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), ap);
         va_end(ap);
 #endif
