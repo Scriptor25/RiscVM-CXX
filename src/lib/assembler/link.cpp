@@ -5,7 +5,7 @@
 #include <RiscVM/Operand.hpp>
 #include <RiscVM/Section.hpp>
 
-std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
+void RiscVM::Assembler::Link(LinkInfo& link_info, std::vector<char>& dest)
 {
     size_t off = 0;
     for (auto& [l_name_, l_align_, l_size_, l_offset_] : link_info.Sections)
@@ -21,7 +21,7 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
         else off += l_size_ = data_.size();
     }
 
-    std::vector<char> dest(off);
+    dest.resize(off);
 
     for (auto& [l_name_, l_align_, l_size_, l_offset_] : link_info.Sections)
     {
@@ -199,6 +199,4 @@ std::vector<char> RiscVM::Assembler::Link(LinkInfo& link_info)
             }
         }
     }
-
-    return std::move(dest);
 }

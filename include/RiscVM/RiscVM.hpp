@@ -16,5 +16,6 @@ namespace RiscVM
 
     typedef std::shared_ptr<Operand> OperandPtr;
 
+    void DumpRaw(const char*, size_t);
     void Dump(const char*, size_t);
 }

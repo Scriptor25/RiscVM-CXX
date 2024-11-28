@@ -2,11 +2,13 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <RiscVM/ArgParser.hpp>
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/VM.hpp>
 
 static int exec(const char* pgm, const size_t size)
 {
+    RiscVM::DumpRaw(pgm, size);
     RiscVM::Dump(pgm, size);
 
     RiscVM::VM vm;
@@ -91,47 +93,30 @@ static void write_bin(const std::string& filename, const char* data, const size_
 
 int main(const int argc, const char* const* argv)
 {
-    bool show_help = false;
-    bool show_version = false;
-    std::string in_filename;
-    std::string in_type = "asm";
-    std::string out_filename;
-    std::string out_type = "bin";
+    RiscVM::ArgParser args({
+        {"help", "print help and exit", {"-h", "--help"}},
+        {"in-type", "specify input filetype (asm, bin, elf, coff)", {"--in-type", "-it"}, false},
+        {"out-type", "specify output filetype (bin, elf, coff)", {"--out-type", "-ot"}, false},
+        {"output", "specify output filename", {"--output", "-o"}, false},
+        {"version", "print version", {"-v", "--version", "--info"}},
+    });
+    args.Parse(argc, argv);
 
-    for (unsigned i = 1; i < argc; ++i)
-    {
-        if (std::string arg = argv[i]; arg == "--help" || arg == "-h") show_help = true;
-        else if (arg == "--version" || arg == "-v") show_version = true;
-        else if (arg == "--in-type" || arg == "-it") in_type = argv[++i];
-        else if (arg == "--output" || arg == "-o") out_filename = argv[++i];
-        else if (arg == "--out-type" || arg == "-ot") out_type = argv[++i];
-        else in_filename = arg;
-    }
+    if (args.Flags["help"] || args.Flags["version"])
+        std::cout << "RiscVM (version 1.0.0)" << std::endl;
 
-    if (show_help)
+    if (args.Flags["help"])
     {
-        std::cout << "RiscVM" << std::endl;
-        std::cout << argv[0] << " <options> <filename>" << std::endl;
-        std::cout << "OPTIONS" << std::endl;
-        std::cout << "--help,     -h            -> display this text" << std::endl;
-        std::cout << "--version,  -v            -> display version info" << std::endl;
-        std::cout << "--in-type,  -it <type>    -> specify output filetype" << std::endl;
-        std::cout << "--output,   -o <filename> -> specify output filename" << std::endl;
-        std::cout << "--out-type, -ot <type>    -> specify output filetype" << std::endl;
-        std::cout << "TYPE" << std::endl;
-        std::cout << "asm  -> source assembly file" << std::endl;
-        std::cout << "bin  -> raw binary file" << std::endl;
-        std::cout << "elf  -> elf binary file" << std::endl;
-        std::cout << "coff -> coff binary file" << std::endl;
+        args.Print();
         return 0;
     }
 
-    if (show_version)
-        std::cout << "RiscVM (version 1.0.0)" << std::endl;
+    const auto& in_filename = args.Args.empty() ? "" : args.Args[0];
+    const auto& out_filename = args.Get("output");
+    const auto& in_type = args.Get("in-type", "asm");
+    const auto& out_type = args.Get("out-type", "bin");
 
     std::vector<char> pgm;
-
-    // TODO: different input type: asm, bin, elf, coff, ...
     if (in_type == "asm")
     {
         RiscVM::LinkInfo link_info
@@ -144,24 +129,53 @@ int main(const int argc, const char* const* argv)
             }
         };
 
-        std::ifstream stream(in_filename);
-        if (stream.is_open())
-            pgm = RiscVM::Assembler(stream).Parse(link_info);
-        else pgm = RiscVM::Assembler(std::cin).Parse(link_info);
-        stream.close();
+        if (in_filename.empty())
+            RiscVM::Assembler::Assemble(std::cin, link_info, pgm);
+        else
+        {
+            std::ifstream stream(in_filename);
+            RiscVM::Assembler::Assemble(stream, link_info, pgm);
+            stream.close();
+        }
 
         if (!out_filename.empty())
         {
-            // TODO: different output type: bin, elf, coff, ...
             if (out_type == "bin")
             {
                 write_bin(out_filename, pgm.data(), pgm.size());
+            }
+            else if (out_type == "elf")
+            {
+                std::cerr << "output file format 'elf' is not YET supported" << std::endl;
+            }
+            else if (out_type == "coff")
+            {
+                std::cerr << "output file format 'coff' is not YET supported" << std::endl;
+            }
+            else
+            {
+                std::cerr << "output file format '" << out_type << "' is not supported" << std::endl;
             }
         }
     }
     else if (in_type == "bin")
     {
         pgm = read_bin(in_filename);
+    }
+    else if (in_type == "elf")
+    {
+        std::cerr << "input file format 'elf' is not YET supported" << std::endl;
+        return 1;
+    }
+    else if (in_type == "coff")
+    {
+        std::cerr << "input file format 'coff' is not YET supported" << std::endl;
+        return 1;
+    }
+    else
+    {
+        std::cerr << "input file format '" << in_type << "' is not supported" << std::endl;
+        return 1;
     }
 
     const auto status = exec(pgm.data(), pgm.size());
