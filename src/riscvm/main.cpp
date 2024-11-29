@@ -8,6 +8,29 @@
 #include <RiscVM/Assembler.hpp>
 #include <RiscVM/VM.hpp>
 
+static void va_init(va_list& ap, char* ptr)
+{
+#ifdef _WIN32
+    ap = ptr;
+#else
+    typedef struct
+    {
+        unsigned int gp_offset;
+        unsigned int fp_offset;
+        void* overflow_arg_area;
+        void* reg_save_area;
+    } va_list_t[1];
+
+    va_list_t list;
+    list->gp_offset = 6 * 8; // 6 registers * 8 bytes
+    list->fp_offset = 6 * 8 + 8 * 16; // gp_offset + 8 registers * 16 bytes
+    list->overflow_arg_area = ptr;
+    list->reg_save_area = nullptr;
+
+    memcpy(&ap, &list, sizeof(va_list_t));
+#endif
+}
+
 static int exec(const char* pgm, const size_t size)
 {
     RiscVM::DumpRaw(pgm, size);
@@ -30,15 +53,9 @@ static int exec(const char* pgm, const size_t size)
     };
     ecall_map[2] = [](RiscVM::VM& vm_)
     {
-#ifdef _WIN32
-        vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
-#else
         va_list ap;
-        auto ptr = vm_.Memory() + vm_.R(RiscVM::a1);
-        memcpy(&ap, &ptr, sizeof(va_list));
+        va_init(ap, vm_.Memory() + vm_.R(RiscVM::a1));
         vfprintf(stdout, vm_.Memory() + vm_.R(RiscVM::a0), ap);
-        va_end(ap);
-#endif
         fflush(stdout);
     };
     ecall_map[3] = [](RiscVM::VM& vm_)
@@ -51,15 +68,9 @@ static int exec(const char* pgm, const size_t size)
     };
     ecall_map[5] = [](RiscVM::VM& vm_)
     {
-#ifdef _WIN32
-        vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), vm_.Memory() + vm_.R(RiscVM::a1));
-#else
         va_list ap;
-        auto ptr = vm_.Memory() + vm_.R(RiscVM::a1);
-        memcpy(&ap, &ptr, sizeof(va_list));
+        va_init(ap, vm_.Memory() + vm_.R(RiscVM::a1));
         vfscanf(stdin, vm_.Memory() + vm_.R(RiscVM::a0), ap);
-        va_end(ap);
-#endif
     };
     ecall_map[120] = [](RiscVM::VM& vm_)
     {
